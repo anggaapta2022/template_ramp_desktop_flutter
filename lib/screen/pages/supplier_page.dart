@@ -80,7 +80,6 @@ class _SupplierPageState extends State<SupplierPage> {
           key: key,
           source: supplierDataSource,
           columnWidthMode: ColumnWidthMode.fill,
-          frozenColumnsCount: 2,
           allowSorting: true,
           allowFiltering: true,
           allowMultiColumnSorting: true,

@@ -82,7 +82,6 @@ class _BarangPageState extends State<BarangPage> {
           key: key,
           source: barangDataSource,
           columnWidthMode: ColumnWidthMode.fill,
-          frozenColumnsCount: 2,
           allowSorting: true,
           allowFiltering: true,
           allowMultiColumnSorting: true,
