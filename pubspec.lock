@@ -145,6 +145,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.8"
+  dylib:
+    dependency: transitive
+    description:
+      name: dylib
+      sha256: bf609b3eb6492a3309b3d1dbe8f83a4031de5535dd7686be33487051cc760bb0
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.3"
   fake_async:
     dependency: transitive
     description:
@@ -174,6 +182,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_libserialport:
+    dependency: "direct main"
+    description:
+      name: flutter_libserialport
+      sha256: "34cc4909eaa5b1502b9e1ad5a7dc597542f009d9adfa37c9a86ae0fb0d3b13fa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -240,6 +256,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.7"
+  libserialport:
+    dependency: transitive
+    description:
+      name: libserialport
+      sha256: "392e1592def65282429832ec66fa25e9e163d3b37716b97691482e2406720727"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0+1"
   lints:
     dependency: transitive
     description:
@@ -297,7 +321,7 @@ packages:
     source: hosted
     version: "0.5.0"
   path:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path
       sha256: "8829d8a55c13fc0e37127c29fedf290c102f4e40ae94ada574091fe0ff96c917"
@@ -437,6 +461,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.1"
+  sqflite_common:
+    dependency: "direct main"
+    description:
+      name: sqflite_common
+      sha256: e77abf6ff961d69dfef41daccbb66b51e9983cdd5cb35bf30733598057401555
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.5"
+  sqflite_common_ffi:
+    dependency: "direct main"
+    description:
+      name: sqflite_common_ffi
+      sha256: f86de82d37403af491b21920a696b19f01465b596f545d1acd4d29a0a72418ad
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.5"
+  sqlite3:
+    dependency: transitive
+    description:
+      name: sqlite3
+      sha256: "281b672749af2edf259fc801f0fcba092257425bcd32a0ce1c8237130bc934c7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.11.2"
   stack_trace:
     dependency: transitive
     description:
@@ -477,6 +525,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "21.2.8"
+  synchronized:
+    dependency: transitive
+    description:
+      name: synchronized
+      sha256: "5fcbd27688af6082f5abd611af56ee575342c30e87541d0245f7ff99faa02c60"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   term_glyph:
     dependency: transitive
     description:

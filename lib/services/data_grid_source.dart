@@ -1,32 +1,13 @@
 // ignore_for_file: avoid_print
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ramp_desktop/models/barang_model.dart';
+import 'package:ramp_desktop/models/timbangan_model.dart';
 import 'package:ramp_desktop/services/global_provider.dart';
 import 'package:ramp_desktop/shared/theme.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-class TimbanganMasuk {
-  TimbanganMasuk(
-    this.noFaktur,
-    this.supplier,
-    this.supir,
-    this.nopol,
-    this.barang,
-    this.bruto,
-    this.manualBruto,
-    this.jamMasuk,
-    this.konfrimasiBruto,
-  );
-  final String noFaktur;
-  final String supplier;
-  final String supir;
-  final String nopol;
-  final String barang;
-  final String bruto;
-  final String manualBruto;
-  final String jamMasuk;
-  final String konfrimasiBruto;
-}
+import '../models/supplier_model.dart';
 
 class TimbanganMasukDataSource extends DataGridSource {
   BuildContext? buildContext;
@@ -35,24 +16,23 @@ class TimbanganMasukDataSource extends DataGridSource {
   List<DataGridRow> get rows => _timbanganMasuk;
 
   TimbanganMasukDataSource(
-      {required List<TimbanganMasuk> timbanganMasuk,
+      {required List<TimbanganMasukModel> timbanganMasuk,
       required this.buildContext}) {
-    _timbanganMasuk = timbanganMasuk
-        .map<DataGridRow>((e) => DataGridRow(cells: [
-              DataGridCell<String>(columnName: 'action', value: e.noFaktur),
-              DataGridCell<String>(columnName: 'noFaktur', value: e.noFaktur),
-              DataGridCell<String>(columnName: 'supplier', value: e.supplier),
-              DataGridCell<String>(columnName: 'supir', value: e.supir),
-              DataGridCell<String>(columnName: 'nopol', value: e.nopol),
-              DataGridCell<String>(columnName: 'barang', value: e.barang),
-              DataGridCell<String>(columnName: 'bruto', value: e.bruto),
-              DataGridCell<String>(
-                  columnName: 'manualBruto', value: e.manualBruto),
-              DataGridCell<String>(columnName: 'jamMasuk', value: e.jamMasuk),
-              DataGridCell<String>(
-                  columnName: 'konfirmasiBruto', value: e.konfrimasiBruto),
-            ]))
-        .toList();
+    _timbanganMasuk = timbanganMasuk.map<DataGridRow>((e) {
+      return DataGridRow(cells: [
+        DataGridCell<String>(columnName: 'action', value: e.idLaporan),
+        DataGridCell<String>(columnName: 'idLaporan', value: e.idLaporan),
+        DataGridCell<String>(columnName: 'supplier', value: e.supplier),
+        DataGridCell<String>(columnName: 'supir', value: e.supir),
+        DataGridCell<String>(columnName: 'nopol', value: e.nopol),
+        DataGridCell<String>(columnName: 'barang', value: e.namaBarang),
+        DataGridCell<int>(columnName: 'bruto', value: e.bruto),
+        DataGridCell<int>(columnName: 'manualBruto', value: e.manualBruto),
+        DataGridCell<String>(columnName: 'jamMasuk', value: e.jamMasuk),
+        DataGridCell<String>(
+            columnName: 'konfirmasiBruto', value: e.konfrimasiBruto),
+      ]);
+    }).toList();
   }
 
   @override
@@ -101,20 +81,12 @@ class TimbanganMasukDataSource extends DataGridSource {
   }
 }
 
-class Barang {
-  Barang(this.idBarang, this.namaBarang, this.tipeBarang, this.satuan);
-  final String idBarang;
-  final String namaBarang;
-  final String tipeBarang;
-  final String satuan;
-}
-
 class BarangDataSource extends DataGridSource {
   List<DataGridRow> _barang = [];
   @override
   List<DataGridRow> get rows => _barang;
 
-  BarangDataSource({required List<Barang> barang}) {
+  BarangDataSource({required List<BarangModel> barang}) {
     _barang = barang
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<String>(columnName: 'idBarang', value: e.idBarang),
@@ -122,7 +94,16 @@ class BarangDataSource extends DataGridSource {
                   columnName: 'namaBarang', value: e.namaBarang),
               DataGridCell<String>(
                   columnName: 'tipeBarang', value: e.tipeBarang),
-              DataGridCell<String>(columnName: 'satuan', value: e.satuan),
+              DataGridCell<String>(
+                  columnName: 'satuanBarang', value: e.satuanBarang),
+              DataGridCell<String>(
+                  columnName: 'tanggalDibuat', value: e.tanggalDibuat),
+              DataGridCell<String>(
+                  columnName: 'tanggalDiubah', value: e.tanggalDiubah),
+              DataGridCell<String>(
+                  columnName: 'diubahOleh', value: e.diubahOleh),
+              DataGridCell<String>(
+                  columnName: 'tanggalSinkron', value: e.tanggalSinkron),
             ]))
         .toList();
   }
@@ -142,28 +123,17 @@ class BarangDataSource extends DataGridSource {
   }
 }
 
-class Supplier {
-  Supplier(this.idSupplier, this.namaSupplier, this.alamat, this.namaSP,
-      this.telepon, this.fax, this.pic);
-  final String idSupplier;
-  final String namaSupplier;
-  final String alamat;
-  final String namaSP;
-  final String telepon;
-  final String fax;
-  final String pic;
-}
-
 class SupplierDataSource extends DataGridSource {
   List<DataGridRow> _supplier = [];
   @override
   List<DataGridRow> get rows => _supplier;
 
-  SupplierDataSource({required List<Supplier> supplier}) {
+  SupplierDataSource({required List<SupplierModel> supplier}) {
     _supplier = supplier
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<String>(
                   columnName: 'idSupplier', value: e.idSupplier),
+              DataGridCell<String>(columnName: 'kodeGroup', value: e.kodeGroup),
               DataGridCell<String>(
                   columnName: 'namaSupplier', value: e.namaSupplier),
               DataGridCell<String>(columnName: 'alamat', value: e.alamat),
@@ -171,6 +141,14 @@ class SupplierDataSource extends DataGridSource {
               DataGridCell<String>(columnName: 'telepon', value: e.telepon),
               DataGridCell<String>(columnName: 'fax', value: e.fax),
               DataGridCell<String>(columnName: 'pic', value: e.pic),
+              DataGridCell<String>(
+                  columnName: 'tanggalDibuat', value: e.tanggalDibuat),
+              DataGridCell<String>(
+                  columnName: 'tanggalDiubah', value: e.tanggalDiubah),
+              DataGridCell<String>(
+                  columnName: 'diubahOleh', value: e.diubahOleh),
+              DataGridCell<String>(
+                  columnName: 'tanggalSinkron', value: e.tanggalSinkron),
             ]))
         .toList();
   }

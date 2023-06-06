@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 part of './pages.dart';
 
 class SupplierPage extends StatefulWidget {
@@ -8,63 +10,19 @@ class SupplierPage extends StatefulWidget {
 }
 
 class _SupplierPageState extends State<SupplierPage> {
-  final int rowsPerPage = 10;
+  int rowsPerPage = 10;
   final GlobalKey<SfDataGridState> key = GlobalKey<SfDataGridState>();
-  List<Supplier> supplier = <Supplier>[];
+  List<SupplierModel> supplier = <SupplierModel>[];
   late SupplierDataSource supplierDataSource;
-  List<Supplier> getSupplier() {
-    return [
-      Supplier("Supplier-12312912", "Supplier 1", "Jl. Supplier 1", "SP1",
-          "0812172171", "924", "Anto"),
-      Supplier("Supplier-82172818", "Supplier 2", "Jl. Supplier 2", "SP2",
-          "0812172171", "924", "Budi"),
-    ];
-  }
 
   @override
   void initState() {
     super.initState();
-    supplier = getSupplier();
-    supplierDataSource = SupplierDataSource(supplier: supplier);
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget buttonCreateSupplier() {
-      return MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          child: Container(
-            width: 150,
-            height: 40,
-            decoration: BoxDecoration(
-              color: cBlue,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Tambah Supplier",
-                  style: whiteTextStyle.copyWith(
-                      fontSize: 12, fontWeight: semiBold),
-                ),
-                const SizedBox(
-                  width: 5,
-                ),
-                FaIcon(
-                  FontAwesomeIcons.plus,
-                  size: 16,
-                  color: cWhite,
-                )
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    Widget buildDataGrid() {
+    Widget buildDataGrid(SupplierDataSource supplierDataSource) {
       return SfDataGridTheme(
         data: SfDataGridThemeData(
             rowHoverColor: cBlue.withOpacity(0.7),
@@ -79,7 +37,8 @@ class _SupplierPageState extends State<SupplierPage> {
         child: SfDataGrid(
           key: key,
           source: supplierDataSource,
-          columnWidthMode: ColumnWidthMode.fill,
+          columnWidthMode: ColumnWidthMode.fitByColumnName,
+          frozenColumnsCount: 2,
           allowSorting: true,
           allowFiltering: true,
           allowMultiColumnSorting: true,
@@ -94,6 +53,16 @@ class _SupplierPageState extends State<SupplierPage> {
                 alignment: Alignment.centerLeft,
                 child: const Text(
                   'ID Supplier',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "kodeGroup",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Kode Group',
                 ),
               ),
             ),
@@ -157,12 +126,52 @@ class _SupplierPageState extends State<SupplierPage> {
                 ),
               ),
             ),
+            GridColumn(
+              columnName: "tanggalDibuat",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Tanggal Dibuat',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "tanggalDiubah",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Tanggal Diubah',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "diubahOleh",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Diubah',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "tanggalSinkron",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Tanggal Sinkron',
+                ),
+              ),
+            ),
           ],
         ),
       );
     }
 
-    Widget pagination() {
+    Widget pagination(SupplierDataSource supplierDataSource) {
       return SfDataPager(
           pageCount: supplier.length / rowsPerPage,
           delegate: supplierDataSource);
@@ -178,31 +187,48 @@ class _SupplierPageState extends State<SupplierPage> {
       ),
       body: Container(
         margin: const EdgeInsets.only(left: 24, right: 24, top: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const ButtonExport(),
-                buttonCreateSupplier(),
-              ],
-            ),
-            LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                        height: context.height * 0.7, child: buildDataGrid()),
-                    pagination(),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
+        child: FutureBuilder(
+            future: DataSupplier().getDataSupplier(),
+            builder: (context, snapshot) {
+              print("isi data: ${snapshot.data}");
+              if (snapshot.data != null) {
+                supplier = snapshot.data;
+                supplierDataSource = SupplierDataSource(supplier: supplier);
+              }
+              return !snapshot.hasData
+                  ? Center(
+                      child: CircularProgressIndicator(color: cBlue),
+                    )
+                  : snapshot.data!.isEmpty
+                      ? Center(
+                          child: Text(
+                            "Tidak ada data",
+                            style: greyTextStyle.copyWith(
+                                fontSize: 14, fontWeight: semiBold),
+                          ),
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const ButtonExport(),
+                            LayoutBuilder(
+                              builder: (BuildContext context,
+                                  BoxConstraints constraints) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                        height: context.height * 0.7,
+                                        child:
+                                            buildDataGrid(supplierDataSource)),
+                                    pagination(supplierDataSource),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        );
+            }),
       ),
     );
   }

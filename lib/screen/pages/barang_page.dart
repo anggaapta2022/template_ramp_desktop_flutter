@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 part of './pages.dart';
 
 class BarangPage extends StatefulWidget {
@@ -8,65 +10,19 @@ class BarangPage extends StatefulWidget {
 }
 
 class _BarangPageState extends State<BarangPage> {
-  final int rowsPerPage = 10;
+  int rowsPerPage = 10;
   final GlobalKey<SfDataGridState> key = GlobalKey<SfDataGridState>();
-  List<Barang> barang = <Barang>[];
+  List<BarangModel> barang = <BarangModel>[];
   late BarangDataSource barangDataSource;
-  List<Barang> getBarang() {
-    return [
-      Barang("Barang-012129312", "Super", "Buah", "kg"),
-      Barang("Barang-012312881", "Besar", "Buah", "kg"),
-      Barang("Barang-921121900", "Sedang", "Buah", "kg"),
-      Barang("Barang-921881999", "Kecil", "Buah", "kg"),
-      Barang("Barang-731618288", "CPO", "Produk", "kg"),
-      Barang("Barang-635161778", "Kernel", "Produk", "kg"),
-    ];
-  }
 
   @override
   void initState() {
     super.initState();
-    barang = getBarang();
-    barangDataSource = BarangDataSource(barang: barang);
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget buttonCreateBarang() {
-      return MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          child: Container(
-            width: 150,
-            height: 40,
-            decoration: BoxDecoration(
-              color: cBlue,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Tambah Barang",
-                  style: whiteTextStyle.copyWith(
-                      fontSize: 12, fontWeight: semiBold),
-                ),
-                const SizedBox(
-                  width: 5,
-                ),
-                FaIcon(
-                  FontAwesomeIcons.plus,
-                  size: 16,
-                  color: cWhite,
-                )
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    Widget buildDataGrid() {
+    Widget buildDataGrid(BarangDataSource barangDataSource) {
       return SfDataGridTheme(
         data: SfDataGridThemeData(
             rowHoverColor: cBlue.withOpacity(0.7),
@@ -81,7 +37,8 @@ class _BarangPageState extends State<BarangPage> {
         child: SfDataGrid(
           key: key,
           source: barangDataSource,
-          columnWidthMode: ColumnWidthMode.fill,
+          columnWidthMode: ColumnWidthMode.fitByColumnName,
+          frozenColumnsCount: 2,
           allowSorting: true,
           allowFiltering: true,
           allowMultiColumnSorting: true,
@@ -120,12 +77,52 @@ class _BarangPageState extends State<BarangPage> {
               ),
             ),
             GridColumn(
-              columnName: "satuan",
+              columnName: "satuanBarang",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'Satuan',
+                  'Satuan Barang',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "tanggalDibuat",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Tanggal Dibuat',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "tanggalDiubah",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Tanggal Diubah',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "diubahOleh",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Diubah',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "tanggalSinkron",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Tanggal Sinkron',
                 ),
               ),
             ),
@@ -134,7 +131,7 @@ class _BarangPageState extends State<BarangPage> {
       );
     }
 
-    Widget pagination() {
+    Widget pagination(BarangDataSource barangDataSource) {
       return SfDataPager(
           pageCount: barang.length / rowsPerPage, delegate: barangDataSource);
     }
@@ -149,31 +146,47 @@ class _BarangPageState extends State<BarangPage> {
       ),
       body: Container(
         margin: const EdgeInsets.only(left: 24, right: 24, top: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const ButtonExport(),
-                buttonCreateBarang(),
-              ],
-            ),
-            LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                        height: context.height * 0.7, child: buildDataGrid()),
-                    pagination(),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
+        child: FutureBuilder(
+            future: DataBarang().getDataBarang(),
+            builder: (context, snapshot) {
+              print("isi data: ${snapshot.data}");
+              if (snapshot.data != null) {
+                barang = snapshot.data;
+                barangDataSource = BarangDataSource(barang: barang);
+              }
+              return !snapshot.hasData
+                  ? Center(
+                      child: CircularProgressIndicator(color: cBlue),
+                    )
+                  : snapshot.data!.isEmpty
+                      ? Center(
+                          child: Text(
+                            "Tidak ada data",
+                            style: greyTextStyle.copyWith(
+                                fontSize: 14, fontWeight: semiBold),
+                          ),
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const ButtonExport(),
+                            LayoutBuilder(
+                              builder: (BuildContext context,
+                                  BoxConstraints constraints) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                        height: context.height * 0.7,
+                                        child: buildDataGrid(barangDataSource)),
+                                    pagination(barangDataSource),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        );
+            }),
       ),
     );
   }

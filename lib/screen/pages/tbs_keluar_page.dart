@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 part of './pages.dart';
 
 class TBSKeluarPage extends StatefulWidget {
@@ -28,80 +30,122 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
   final formKey2 = GlobalKey<FormState>();
   bool inputManual = false;
   String dateNow = DateFormat('dd MMM yyyy').format(DateTime.now());
+  List<TimbanganMasukModel> dataTimbangan = <TimbanganMasukModel>[];
+  @override
+  void initState() {
+    super.initState();
+    print("isi idSelected: ${widget.idSelected}");
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget sectionIformationTimbangMasuk() {
       return Container(
         margin: const EdgeInsets.only(bottom: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Informasi Timbangan Masuk",
-              style: greyTextStyle.copyWith(fontSize: 16, fontWeight: semiBold),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Text(
-              "Supplier",
-              style: greyTextStyle.copyWith(fontSize: 14, fontWeight: medium),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            Text(
-              "Supplier 1",
-              style:
-                  blackTextStyle.copyWith(fontSize: 16, fontWeight: semiBold),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Text(
-              "No. Polisi",
-              style: greyTextStyle.copyWith(fontSize: 14, fontWeight: medium),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            Text(
-              "BM 1234 ENK",
-              style:
-                  blackTextStyle.copyWith(fontSize: 16, fontWeight: semiBold),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Text(
-              "Supir",
-              style: greyTextStyle.copyWith(fontSize: 14, fontWeight: medium),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            Text(
-              "Supir 1",
-              style:
-                  blackTextStyle.copyWith(fontSize: 16, fontWeight: semiBold),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Text(
-              "Barang",
-              style: greyTextStyle.copyWith(fontSize: 14, fontWeight: medium),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            Text(
-              "TBS",
-              style:
-                  blackTextStyle.copyWith(fontSize: 16, fontWeight: semiBold),
-            ),
-          ],
-        ),
+        child: FutureBuilder(
+            future: DataTimbanganMasuk()
+                .getDataTimbanganMasukById(widget.idSelected),
+            builder: (context, snapshot) {
+              if (snapshot.data != null) {
+                Timer(const Duration(seconds: 2), () {
+                  if (mounted) {
+                    setState(() {
+                      dataTimbangan = snapshot.data;
+                      print("isi dataTimbangan: $dataTimbangan");
+                    });
+                  }
+                });
+              }
+              return !snapshot.hasData
+                  ? Center(
+                      child: CircularProgressIndicator(color: cBlue),
+                    )
+                  : dataTimbangan.isEmpty
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            color: cBlue,
+                          ),
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Informasi Timbangan Masuk",
+                              style: greyTextStyle.copyWith(
+                                  fontSize: 16, fontWeight: semiBold),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              "Supplier",
+                              style: greyTextStyle.copyWith(
+                                  fontSize: 14, fontWeight: medium),
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              dataTimbangan[0].supplier,
+                              style: blackTextStyle.copyWith(
+                                  fontSize: 16, fontWeight: semiBold),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              "No. Polisi",
+                              style: greyTextStyle.copyWith(
+                                  fontSize: 14, fontWeight: medium),
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              dataTimbangan[0].nopol,
+                              style: blackTextStyle.copyWith(
+                                  fontSize: 16, fontWeight: semiBold),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              "Supir",
+                              style: greyTextStyle.copyWith(
+                                  fontSize: 14, fontWeight: medium),
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              dataTimbangan[0].supir,
+                              style: blackTextStyle.copyWith(
+                                  fontSize: 16, fontWeight: semiBold),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              "Nama Barang",
+                              style: greyTextStyle.copyWith(
+                                  fontSize: 14, fontWeight: medium),
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              dataTimbangan[0].namaBarang,
+                              style: blackTextStyle.copyWith(
+                                  fontSize: 16, fontWeight: semiBold),
+                            ),
+                          ],
+                        );
+            }),
       );
     }
 
@@ -384,11 +428,22 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Text(
-                    "Supplier: Supplier 1",
-                    style: blackTextStyle.copyWith(
-                        fontSize: 14, fontWeight: semiBold),
-                  ),
+                  child: dataTimbangan.isEmpty
+                      ? Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                            height: 25,
+                            width: 25,
+                            child: CircularProgressIndicator(
+                              color: cBlue,
+                            ),
+                          ),
+                        )
+                      : Text(
+                          "Supplier: ${dataTimbangan[0].supplier}",
+                          style: blackTextStyle.copyWith(
+                              fontSize: 14, fontWeight: semiBold),
+                        ),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -477,196 +532,202 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                     ),
                   ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        FaIcon(
-                          FontAwesomeIcons.truckFront,
-                          size: 18,
+                child: dataTimbangan.isEmpty
+                    ? Center(
+                        child: CircularProgressIndicator(
                           color: cBlue,
                         ),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        Expanded(
-                          child: Text(
-                            "BM 1234 ENK",
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              FaIcon(
+                                FontAwesomeIcons.truckFront,
+                                size: 18,
+                                color: cBlue,
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  dataTimbangan[0].nopol,
+                                  style: blackTextStyle.copyWith(
+                                      fontSize: 14, fontWeight: medium),
+                                ),
+                              ),
+                              Text(
+                                dataTimbangan[0].namaBarang,
+                                style: blackTextStyle.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: medium,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Berat Bruto:",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                                Text("${dataTimbangan[0].bruto} kg",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Manual Bruto:",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                                Text("${dataTimbangan[0].manualBruto} kg",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Berat Tara:",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                                Text("0 kg",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Manual Tara:",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                                Text("0 kg",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Berat Netto:",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                                Text("0 kg",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Potongan (0.0 %):",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                                Text("0 kg",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Berat Terima:",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                                Text("0 kg",
+                                    style: blackTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: medium)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text("Berat Tandan",
+                              style: blackTextStyle.copyWith(
+                                  fontSize: 14, fontWeight: medium)),
+                          TextFormField(
+                            controller: beratTandanController,
                             style: blackTextStyle.copyWith(
-                                fontSize: 14, fontWeight: medium),
+                                fontSize: 14, fontWeight: semiBold),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Field tidak boleh kosong";
+                              }
+                              return null;
+                            },
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: cBlue)),
+                              enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: cGrey)),
+                              hintText: "0",
+                              hintStyle: greyTextStyle.copyWith(
+                                  fontSize: 14, fontWeight: light),
+                            ),
                           ),
-                        ),
-                        Text(
-                          "TBS",
-                          style: blackTextStyle.copyWith(
-                            fontSize: 14,
-                            fontWeight: medium,
+                          const SizedBox(
+                            height: 20,
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Berat Bruto:",
+                          Text("Jumlah Tandan",
                               style: blackTextStyle.copyWith(
                                   fontSize: 14, fontWeight: medium)),
-                          Text("0.0 kg",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
+                          TextFormField(
+                            controller: jumlahTandanController,
+                            style: blackTextStyle.copyWith(
+                                fontSize: 14, fontWeight: semiBold),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Field tidak boleh kosong";
+                              }
+                              return null;
+                            },
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            decoration: InputDecoration(
+                              focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: cBlue)),
+                              enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: cGrey)),
+                              hintText: "0",
+                              hintStyle: greyTextStyle.copyWith(
+                                  fontSize: 14, fontWeight: light),
+                            ),
+                          ),
                         ],
                       ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Manual Bruto:",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
-                          Text("7000.0 kg",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Berat Tara:",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
-                          Text("0.0 kg",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Manual Tara:",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
-                          Text("0.0 kg",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Berat Netto:",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
-                          Text("0.0 kg",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Potongan (0.0 %):",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
-                          Text("0.0 kg",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Berat Terima:",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
-                          Text("0.0 kg",
-                              style: blackTextStyle.copyWith(
-                                  fontSize: 14, fontWeight: medium)),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Text("Berat Tandan",
-                        style: blackTextStyle.copyWith(
-                            fontSize: 14, fontWeight: medium)),
-                    TextFormField(
-                      controller: beratTandanController,
-                      style: blackTextStyle.copyWith(
-                          fontSize: 14, fontWeight: semiBold),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Field tidak boleh kosong";
-                        }
-                        return null;
-                      },
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.digitsOnly
-                      ],
-                      decoration: InputDecoration(
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: cBlue)),
-                        enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: cGrey)),
-                        hintText: "0",
-                        hintStyle: greyTextStyle.copyWith(
-                            fontSize: 14, fontWeight: light),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Text("Jumlah Tandan",
-                        style: blackTextStyle.copyWith(
-                            fontSize: 14, fontWeight: medium)),
-                    TextFormField(
-                      controller: jumlahTandanController,
-                      style: blackTextStyle.copyWith(
-                          fontSize: 14, fontWeight: semiBold),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Field tidak boleh kosong";
-                        }
-                        return null;
-                      },
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.digitsOnly
-                      ],
-                      decoration: InputDecoration(
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: cBlue)),
-                        enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: cGrey)),
-                        hintText: "0",
-                        hintStyle: greyTextStyle.copyWith(
-                            fontSize: 14, fontWeight: light),
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ),
             SizedBox(

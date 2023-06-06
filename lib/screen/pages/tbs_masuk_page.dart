@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
 
 part of './pages.dart';
 
@@ -10,11 +10,6 @@ class TBSMasukPage extends StatefulWidget {
 }
 
 class _TBSMasukPageState extends State<TBSMasukPage> {
-  TextEditingController supplierController = TextEditingController();
-  TextEditingController nopolController = TextEditingController();
-  TextEditingController supirController = TextEditingController();
-  TextEditingController barangContoller = TextEditingController();
-  TextEditingController inputManualController = TextEditingController();
   final focusSupplier = FocusNode();
   final focusNopol = FocusNode();
   final focusSupir = FocusNode();
@@ -59,98 +54,20 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
   String dateNow = DateFormat('dd/MM/yy').format(DateTime.now());
   final formKey = GlobalKey<FormState>();
   final GlobalKey<SfDataGridState> key = GlobalKey<SfDataGridState>();
-  List<TimbanganMasuk> timbanganMasuk = <TimbanganMasuk>[];
-  late TimbanganMasukDataSource timbanganDataSource;
-  List<TimbanganMasuk> getTimbanganMasuk() {
-    return [
-      TimbanganMasuk(
-        "FP-02/06/23/1234",
-        "Supplier 1",
-        "Supir 1",
-        "BM 1234 ENK",
-        "TBS",
-        "0.0",
-        "1000",
-        "2023-06-02 16:30:10",
-        "Dikonfirmasi",
-      ),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-      TimbanganMasuk("FP-02/06/23/1234", "Supplier 1", "Supir 1", "BM 1234 ENK",
-          "TBS", "0.0", "1000", "2023-06-02 16:30:10", "Dikonfirmasi"),
-    ];
-  }
+  List<TimbanganMasukModel> timbanganMasuk = <TimbanganMasukModel>[];
+  DataTimbanganMasuk dataTimbanganMasuk = DataTimbanganMasuk();
+  late TimbanganMasukDataSource timbanganMasukDataSource;
 
   final int rowsPerPage = 10;
 
   @override
   void initState() {
     super.initState();
-    timbanganMasuk = getTimbanganMasuk();
-    timbanganDataSource = TimbanganMasukDataSource(
-        timbanganMasuk: timbanganMasuk, buildContext: context);
   }
 
   @override
   Widget build(BuildContext context) {
+    var globalProvider = Provider.of<GlobalProvider>(context);
     Widget sectionInput() {
       return Container(
         margin: const EdgeInsets.only(bottom: 20),
@@ -166,7 +83,7 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
               dataList: dataSupplier,
               title: "Supplier",
               focusNode: focusSupplier,
-              controller: supplierController,
+              controller: globalProvider.supplierController,
               onSubmit: (data) {
                 print("isi data submit: $data");
               },
@@ -181,7 +98,7 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
               dataList: dataNopol,
               title: "No. Polisi",
               focusNode: focusNopol,
-              controller: nopolController,
+              controller: globalProvider.nopolController,
               onSubmit: (data) {
                 print("isi data submit: $data");
               },
@@ -196,7 +113,7 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
               dataList: dataSupir,
               title: "Supir",
               focusNode: focusSupir,
-              controller: supirController,
+              controller: globalProvider.supirController,
               onSubmit: (data) {
                 print("isi data submit: $data");
               },
@@ -211,7 +128,7 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
               dataList: dataBarang,
               title: "Barang",
               focusNode: focusBarang,
-              controller: barangContoller,
+              controller: globalProvider.barangController,
               onSubmit: (data) {
                 print("isi data submit: $data");
               },
@@ -320,7 +237,7 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
             ),
             inputManual
                 ? TextFormField(
-                    controller: inputManualController,
+                    controller: globalProvider.inputManualController,
                     keyboardType: TextInputType.number,
                     style:
                         blackTextStyle.copyWith(fontSize: 16, fontWeight: bold),
@@ -358,7 +275,7 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
                   width: 5,
                 ),
                 Text(
-                  "FP-$dateNow/${randomNumeric(4)}",
+                  globalProvider.idLaporan,
                   style: customTextStyle.copyWith(
                       fontSize: 16, fontWeight: bold, color: cBlue),
                 ),
@@ -402,7 +319,17 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
                         backgroundColor: cTransparent,
                         alignment: Alignment.center,
                         shadowColor: cBlack.withOpacity(0.5),
-                        child: const DialogKonfirmasiTBSMasuk(),
+                        child: DialogKonfirmasiTBSMasuk(
+                            supplier: globalProvider.supplierController.text,
+                            nopol: globalProvider.nopolController.text,
+                            supir: globalProvider.supirController.text,
+                            namaBarang: globalProvider.barangController.text,
+                            bruto: "0",
+                            manualBruto:
+                                globalProvider.inputManualController.text,
+                            idLaporan: globalProvider.idLaporan,
+                            jamMasuk: DateFormat('yyyy-MM-dd HH:mm:ss')
+                                .format(DateTime.now())),
                       ),
                     );
                   },
@@ -449,7 +376,7 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
       );
     }
 
-    Widget buildDataGrid() {
+    Widget buildDataGrid(TimbanganMasukDataSource timbanganMasukDataSource) {
       return SfDataGridTheme(
         data: SfDataGridThemeData(
             rowHoverColor: cBlue.withOpacity(0.7),
@@ -463,7 +390,7 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
             sortOrderNumberColor: cRed.withOpacity(0.7)),
         child: SfDataGrid(
           key: key,
-          source: timbanganDataSource,
+          source: timbanganMasukDataSource,
           columnWidthMode: ColumnWidthMode.fitByColumnName,
           frozenColumnsCount: 2,
           allowSorting: true,
@@ -484,12 +411,12 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
               ),
             ),
             GridColumn(
-              columnName: "noFaktur",
+              columnName: "idLaporan",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'No. Faktur',
+                  'ID Laporan',
                 ),
               ),
             ),
@@ -519,7 +446,7 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'No. Polisi',
+                  'No.Polisi',
                 ),
               ),
             ),
@@ -578,54 +505,88 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
       );
     }
 
-    Widget pagination() {
+    Widget pagination(TimbanganMasukDataSource timbanganMasukDataSource) {
       return SfDataPager(
           pageCount: timbanganMasuk.length / rowsPerPage,
-          delegate: timbanganDataSource);
+          delegate: timbanganMasukDataSource);
     }
 
-    return Row(
-      children: [
-        Container(
-          width: context.width * 0.3,
-          margin: const EdgeInsets.only(left: 24, right: 24, top: 10),
-          child: Form(
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            key: formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                sectionInput(),
-                sectionBruto(),
-                buttonSubmit(),
-              ],
-            ),
-          ),
-        ),
-        const VerticalDivider(),
-        Expanded(
-            child: Container(
-          margin: const EdgeInsets.only(left: 24, right: 24, top: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return globalProvider.loading
+        ? Center(
+            child: CircularProgressIndicator(color: cBlue),
+          )
+        : Row(
             children: [
-              const ButtonExport(),
-              LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                  return Column(
+              Container(
+                width: context.width * 0.3,
+                margin: const EdgeInsets.only(left: 24, right: 24, top: 10),
+                child: Form(
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  key: formKey,
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                          height: context.height * 0.6, child: buildDataGrid()),
-                      pagination(),
+                      sectionInput(),
+                      sectionBruto(),
+                      buttonSubmit(),
                     ],
-                  );
-                },
+                  ),
+                ),
               ),
+              const VerticalDivider(),
+              Expanded(
+                  child: Container(
+                margin: const EdgeInsets.only(left: 24, right: 24, top: 10),
+                child: FutureBuilder(
+                    future: DataTimbanganMasuk().getDataTimbanganMasuk(),
+                    builder: (context, snapshot) {
+                      print("isi data: ${snapshot.data}");
+                      if (snapshot.data != null) {
+                        timbanganMasuk = snapshot.data;
+                        timbanganMasukDataSource = TimbanganMasukDataSource(
+                            timbanganMasuk: timbanganMasuk,
+                            buildContext: context);
+                      }
+                      return !snapshot.hasData
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                color: cBlue,
+                              ),
+                            )
+                          : snapshot.data!.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    "Tidak ada data",
+                                    style: greyTextStyle.copyWith(
+                                        fontSize: 14, fontWeight: semiBold),
+                                  ),
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const ButtonExport(),
+                                    LayoutBuilder(
+                                      builder: (BuildContext context,
+                                          BoxConstraints constraints) {
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(
+                                                height: context.height * 0.6,
+                                                child: buildDataGrid(
+                                                    timbanganMasukDataSource)),
+                                            pagination(
+                                                timbanganMasukDataSource),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                );
+                    }),
+              )),
             ],
-          ),
-        )),
-      ],
-    );
+          );
   }
 }

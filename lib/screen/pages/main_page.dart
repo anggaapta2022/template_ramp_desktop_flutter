@@ -25,7 +25,7 @@ class MainPage extends StatelessWidget {
                 ),
               ),
               Text(
-                "Ramp Desktop",
+                "WBMS Desktop",
                 style: whiteTextStyle.copyWith(
                     fontSize: 16, fontWeight: semiBold, color: cBlack),
               ),

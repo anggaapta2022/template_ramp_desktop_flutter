@@ -3,6 +3,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:ramp_desktop/screen/pages/pages.dart';
 import 'package:ramp_desktop/services/page_provider.dart';
+import 'package:ramp_desktop/services/timbangan_masuk_provider.dart';
 import 'package:ramp_desktop/shared/theme.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 
@@ -36,6 +37,8 @@ class MyApp extends StatelessWidget {
             create: (context) => GlobalProvider()),
         ChangeNotifierProvider<PageProvider>(
             create: (context) => PageProvider()),
+        ChangeNotifierProvider<TimbanganMasukProvider>(
+            create: (context) => TimbanganMasukProvider()),
       ],
       child: MaterialApp(
         theme: ThemeData(
