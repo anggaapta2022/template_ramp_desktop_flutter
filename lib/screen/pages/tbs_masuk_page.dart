@@ -14,42 +14,6 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
   final focusNopol = FocusNode();
   final focusSupir = FocusNode();
   final focusBarang = FocusNode();
-  Map<String, String> dataSupplier = {
-    'supplier1': 'PT Supplier 1',
-    'supplier2': 'PT Supplier 2',
-    'supplier3': 'PT Supplier 3',
-    'supplier4': 'PT Supplier 4',
-    'supplier5': 'PT Supplier 5',
-  };
-  Map<String, String> dataNopol = {
-    'nopol1': 'BM 1234 AEK',
-    'nopol2': 'BM 4321 KEA',
-    'nopol3': 'BM 1357 CUY',
-    'nopol4': 'BM 7531 YUC',
-    'nopol5': 'BM 2468 AHH',
-    'nopol6': 'BM 4321 KEA',
-    'nopol7': 'BM 1357 CUY',
-    'nopol8': 'BM 7531 YUC',
-    'nopol9': 'BM 2468 AHH',
-    'nopol10': 'BM 4321 KEA',
-    'nopol11': 'BM 1357 CUY',
-    'nopol12': 'BM 7531 YUC',
-    'nopol13': 'BM 2468 AHH',
-  };
-  Map<String, String> dataSupir = {
-    'supir1': 'Supir 1',
-    'supir2': 'Supir 2',
-    'supir3': 'Supir 3',
-    'supir4': 'Supir 4',
-    'supir5': 'Supir 5',
-  };
-  Map<String, String> dataBarang = {
-    'barang1': 'CPO',
-    'barang2': 'TBS',
-    'barang3': 'Barang 3',
-    'barang4': 'Barang 4',
-    'barang5': 'Barang 5',
-  };
   bool inputManual = false;
   String dateNow = DateFormat('dd/MM/yy').format(DateTime.now());
   final formKey = GlobalKey<FormState>();
@@ -57,17 +21,127 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
   List<TimbanganMasukModel> timbanganMasuk = <TimbanganMasukModel>[];
   DataTimbanganMasuk dataTimbanganMasuk = DataTimbanganMasuk();
   late TimbanganMasukDataSource timbanganMasukDataSource;
+  Map<String, String> dataListSupplier = {};
+  Map<String, String> dataListBarang = {};
+  Map<String, String> dataListKendaraan = {};
+  Map<String, String> dataListSupir = {};
+  String receivedData = "";
+  String isConnect = "Konek Timbangan";
+  late SerialPort port;
 
   final int rowsPerPage = 10;
+
+  getData() async {
+    var dataSupplierTemp = await DataSupplier().getDataSupplierInputText();
+    var dataBarangTemp = await DataBarang().getDataBarangInputText();
+    var dataKendaraanTemp = await DataKendaraan().getDataKendaraanInputText();
+    var dataSupirTemp = await DataSupir().getDataSupirInputText();
+    setState(() {
+      dataListSupplier = dataSupplierTemp;
+      dataListBarang = dataBarangTemp;
+      dataListKendaraan = dataKendaraanTemp;
+      dataListSupir = dataSupirTemp;
+      print("isi dataList supplier: $dataListSupplier");
+      print("isi dataList barang: $dataListBarang");
+    });
+  }
+
+  Future getValuePreferences() async {
+    var indikatorProvider =
+        Provider.of<IndikatorProvider>(context, listen: false);
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    indikatorProvider.devicePort = preferences.getString("port") == ""
+        ? ""
+        : preferences.getString("port")!;
+    indikatorProvider.baudRate = preferences.getString("baudRate") == ""
+        ? ""
+        : preferences.getString("baudRate")!;
+    indikatorProvider.parity = preferences.getString("parity") == ""
+        ? ""
+        : preferences.getString("parity")!;
+    indikatorProvider.dataBits = preferences.getString("dataBits") == ""
+        ? ""
+        : preferences.getString("dataBits")!;
+    indikatorProvider.stopBits = preferences.getString("stopBits") == ""
+        ? ""
+        : preferences.getString("stopBits")!;
+  }
+
+  openAndGetData() {
+    var indikatorProvider =
+        Provider.of<IndikatorProvider>(context, listen: false);
+    port = SerialPort(indikatorProvider.devicePort,
+        BaudRate: int.parse(indikatorProvider.baudRate),
+        StopBits: int.parse(indikatorProvider.stopBits),
+        openNow: false,
+        Parity: indikatorProvider.parity == "None"
+            ? 0
+            : indikatorProvider.parity == "Odd"
+                ? 1
+                : 2,
+        ByteSize: int.parse(indikatorProvider.dataBits),
+        ReadIntervalTimeout: 1,
+        ReadTotalTimeoutConstant: 2);
+    port.open();
+    print("status port: ${port.isOpened}");
+    String msg = "";
+    port.readBytesOnListen(16, (value) {
+      String decodedString = ascii.decode(value);
+      String replacedString =
+          decodedString.replaceAll(RegExp('[\x02\x03]'), '|');
+
+      if (replacedString != "+" && replacedString.isNotEmpty) {
+        if (msg.length == 9) {
+          if (mounted) {
+            String msgFinal = msg;
+            setState(() {
+              receivedData = msgFinal.replaceAll('|', '').substring(0, 6);
+            });
+          }
+        } else if (replacedString == "|" && msg.length > 10) {
+          msg = "";
+        }
+        msg += replacedString;
+      }
+      print("isi data: $receivedData");
+    });
+  }
+
+  closePort() {
+    var indikatorProvider =
+        Provider.of<IndikatorProvider>(context, listen: false);
+    port = SerialPort(indikatorProvider.devicePort,
+        BaudRate: int.parse(indikatorProvider.baudRate),
+        StopBits: int.parse(indikatorProvider.stopBits),
+        openNow: false,
+        Parity: indikatorProvider.parity == "None"
+            ? 0
+            : indikatorProvider.parity == "Odd"
+                ? 1
+                : 2,
+        ByteSize: int.parse(indikatorProvider.dataBits),
+        ReadIntervalTimeout: 1,
+        ReadTotalTimeoutConstant: 2);
+    port.close();
+    print("status port: ${port.isOpened}");
+  }
 
   @override
   void initState() {
     super.initState();
+    getData();
+    getValuePreferences();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     var globalProvider = Provider.of<GlobalProvider>(context);
+    var timMasukProvider = Provider.of<TimbanganMasukProvider>(context);
     Widget sectionInput() {
       return Container(
         margin: const EdgeInsets.only(bottom: 20),
@@ -80,10 +154,10 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
                 size: 16,
                 color: cGrey.withOpacity(0.4),
               ),
-              dataList: dataSupplier,
+              dataList: dataListSupplier,
               title: "Supplier",
               focusNode: focusSupplier,
-              controller: globalProvider.supplierController,
+              controller: timMasukProvider.supplierController,
               onSubmit: (data) {
                 print("isi data submit: $data");
               },
@@ -95,10 +169,10 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
                 size: 16,
                 color: cGrey.withOpacity(0.4),
               ),
-              dataList: dataNopol,
+              dataList: dataListKendaraan,
               title: "No. Polisi",
               focusNode: focusNopol,
-              controller: globalProvider.nopolController,
+              controller: timMasukProvider.nopolController,
               onSubmit: (data) {
                 print("isi data submit: $data");
               },
@@ -110,10 +184,10 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
                 size: 16,
                 color: cGrey.withOpacity(0.4),
               ),
-              dataList: dataSupir,
+              dataList: dataListSupir,
               title: "Supir",
               focusNode: focusSupir,
-              controller: globalProvider.supirController,
+              controller: timMasukProvider.supirController,
               onSubmit: (data) {
                 print("isi data submit: $data");
               },
@@ -125,10 +199,10 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
                 size: 16,
                 color: cGrey.withOpacity(0.4),
               ),
-              dataList: dataBarang,
+              dataList: dataListBarang,
               title: "Barang",
               focusNode: focusBarang,
-              controller: globalProvider.barangController,
+              controller: timMasukProvider.barangController,
               onSubmit: (data) {
                 print("isi data submit: $data");
               },
@@ -157,7 +231,7 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
                             fontSize: 20, fontWeight: semiBold),
                       ),
                       Text(
-                        "0000 kg",
+                        "${receivedData == "" ? "0000000" : receivedData} kg",
                         style: customTextStyle.copyWith(
                             fontSize: 24, fontWeight: bold, color: cBlue),
                       ),
@@ -167,16 +241,41 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
+                    onTap: isConnect != "Konek Timbangan"
+                        ? () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => Dialog(
+                                backgroundColor: cTransparent,
+                                alignment: Alignment.center,
+                                shadowColor: cBlack.withOpacity(0.5),
+                                child: const UnPlug(),
+                              ),
+                            );
+                            setState(() {
+                              closePort();
+                              isConnect = "Konek Timbangan";
+                              receivedData = "";
+                            });
+                          }
+                        : () {
+                            setState(() {
+                              openAndGetData();
+                              isConnect = "Putuskan Koneksi";
+                            });
+                          },
                     child: Container(
                       width: context.width * 0.12,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: cGreen.withOpacity(0.5),
+                        color: isConnect != "Konek Timbangan"
+                            ? cRed.withOpacity(0.5)
+                            : cGreen.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
                         child: Text(
-                          "Konek Timbangan",
+                          isConnect,
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: semiBold),
                         ),
@@ -237,7 +336,7 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
             ),
             inputManual
                 ? TextFormField(
-                    controller: globalProvider.inputManualController,
+                    controller: timMasukProvider.inputManualController,
                     keyboardType: TextInputType.number,
                     style:
                         blackTextStyle.copyWith(fontSize: 16, fontWeight: bold),
@@ -275,7 +374,7 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
                   width: 5,
                 ),
                 Text(
-                  globalProvider.idLaporan,
+                  timMasukProvider.idLaporanMasuk,
                   style: customTextStyle.copyWith(
                       fontSize: 16, fontWeight: bold, color: cBlue),
                 ),
@@ -320,14 +419,14 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
                         alignment: Alignment.center,
                         shadowColor: cBlack.withOpacity(0.5),
                         child: DialogKonfirmasiTBSMasuk(
-                            supplier: globalProvider.supplierController.text,
-                            nopol: globalProvider.nopolController.text,
-                            supir: globalProvider.supirController.text,
-                            namaBarang: globalProvider.barangController.text,
-                            bruto: "0",
+                            supplier: timMasukProvider.supplierController.text,
+                            nopol: timMasukProvider.nopolController.text,
+                            supir: timMasukProvider.supirController.text,
+                            namaBarang: timMasukProvider.barangController.text,
+                            bruto: receivedData.replaceFirst(RegExp('^0+'), ''),
                             manualBruto:
-                                globalProvider.inputManualController.text,
-                            idLaporan: globalProvider.idLaporan,
+                                timMasukProvider.inputManualController.text,
+                            idLaporan: timMasukProvider.idLaporanMasuk,
                             jamMasuk: DateFormat('yyyy-MM-dd HH:mm:ss')
                                 .format(DateTime.now())),
                       ),
@@ -354,18 +453,28 @@ class _TBSMasukPageState extends State<TBSMasukPage> {
               width: 25,
             ),
             Expanded(
-              child: GestureDetector(
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: cOrange.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Reset",
-                      style: whiteTextStyle.copyWith(
-                          fontSize: 18, fontWeight: semiBold),
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () {
+                    timMasukProvider.supplierController.text = "";
+                    timMasukProvider.nopolController.text = "";
+                    timMasukProvider.supirController.text = "";
+                    timMasukProvider.barangController.text = "";
+                    timMasukProvider.inputManualController.text = "";
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: cOrange.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "Reset",
+                        style: whiteTextStyle.copyWith(
+                            fontSize: 18, fontWeight: semiBold),
+                      ),
                     ),
                   ),
                 ),

@@ -10,54 +10,17 @@ class LaporanPage extends StatefulWidget {
 class _LaporanPageState extends State<LaporanPage> {
   final int rowsPerPage = 10;
   final GlobalKey<SfDataGridState> key = GlobalKey<SfDataGridState>();
-  List<Laporan> laporan = <Laporan>[];
+  List<TimbanganKeluarModel> laporan = <TimbanganKeluarModel>[];
   late LaporanDataSource laporanDataSource;
-  List<Laporan> getLaporan() {
-    return [
-      Laporan(
-          "LP-12128318231",
-          "Supplier 1",
-          "Budi",
-          "BM 1234 ENK",
-          "Super",
-          "0.0",
-          "2500 kg",
-          "2023-06-04 13:24",
-          "Terkonfirmai",
-          "0.0",
-          "500 kg",
-          "2023-06-04 15:23",
-          "Terkonfirmasi",
-          "100 kg",
-          "10 %",
-          "250 kg",
-          "1500 kg",
-          "2023-06-04",
-          "5 kg",
-          "5 kg",
-          "10 kg",
-          "10 kg",
-          "10 kg",
-          "10 kg",
-          "10 kg",
-          "0 kg",
-          "0 kg",
-          "0 kg",
-          "0 kg",
-          "0 kg")
-    ];
-  }
 
   @override
   void initState() {
     super.initState();
-    laporan = getLaporan();
-    laporanDataSource = LaporanDataSource(laporan: laporan);
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget buildDataGrid() {
+    Widget buildDataGrid(LaporanDataSource laporanDataSource) {
       return SfDataGridTheme(
         data: SfDataGridThemeData(
             rowHoverColor: cBlue.withOpacity(0.7),
@@ -82,42 +45,52 @@ class _LaporanPageState extends State<LaporanPage> {
           swipeMaxOffset: 100,
           columns: [
             GridColumn(
-              columnName: "idLaporan",
+              columnName: "idLaporanKeluar",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'ID Laporan',
+                  'ID Laporan Keluar',
                 ),
               ),
             ),
             GridColumn(
-              columnName: "supplier",
+              columnName: "idLaporanMasuk",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'Suppliler',
+                  'ID Laporan Masuk',
                 ),
               ),
             ),
             GridColumn(
-              columnName: "supir",
+              columnName: "namaSupplier",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'supir',
+                  'Nama Supplier',
                 ),
               ),
             ),
             GridColumn(
-              columnName: "nopol",
+              columnName: "noPolisi",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
                   'No. Polisi',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "namaSupir",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Nama Supir',
                 ),
               ),
             ),
@@ -152,22 +125,12 @@ class _LaporanPageState extends State<LaporanPage> {
               ),
             ),
             GridColumn(
-              columnName: "jamMasuk",
-              label: Container(
-                padding: const EdgeInsets.all(16.0),
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  'Jam Masuk',
-                ),
-              ),
-            ),
-            GridColumn(
               columnName: "konfirmasiBruto",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'KonfirmasiBruto',
+                  'Konfirmasi Bruto',
                 ),
               ),
             ),
@@ -192,16 +155,6 @@ class _LaporanPageState extends State<LaporanPage> {
               ),
             ),
             GridColumn(
-              columnName: "jamKeluar",
-              label: Container(
-                padding: const EdgeInsets.all(16.0),
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  'Jam Keluar',
-                ),
-              ),
-            ),
-            GridColumn(
               columnName: "konfirmasiTara",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
@@ -222,42 +175,12 @@ class _LaporanPageState extends State<LaporanPage> {
               ),
             ),
             GridColumn(
-              columnName: "Potongan Percent",
+              columnName: "potPercent",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
                   'Potongan Percent',
-                ),
-              ),
-            ),
-            GridColumn(
-              columnName: "potonganBerat",
-              label: Container(
-                padding: const EdgeInsets.all(16.0),
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  'Potongan Berat',
-                ),
-              ),
-            ),
-            GridColumn(
-              columnName: "beratTerima",
-              label: Container(
-                padding: const EdgeInsets.all(16.0),
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  'Berat Terima',
-                ),
-              ),
-            ),
-            GridColumn(
-              columnName: "tanggalTimbang",
-              label: Container(
-                padding: const EdgeInsets.all(16.0),
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  'Tanggal Timbang',
                 ),
               ),
             ),
@@ -282,102 +205,172 @@ class _LaporanPageState extends State<LaporanPage> {
               ),
             ),
             GridColumn(
-              columnName: "air",
+              columnName: "potAir",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'Air',
+                  'Potongan Air',
                 ),
               ),
             ),
             GridColumn(
-              columnName: "sampah",
+              columnName: "potSampah",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'Sampah',
+                  'Potongan Sampah',
                 ),
               ),
             ),
             GridColumn(
-              columnName: "tangkai",
+              columnName: "potTangkai",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'Tangkai',
+                  'Potongan Tangkai',
                 ),
               ),
             ),
             GridColumn(
-              columnName: "pasir",
+              columnName: "potPasir",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'Pasir',
+                  'Potongan Pasir',
                 ),
               ),
             ),
             GridColumn(
-              columnName: "mutu",
+              columnName: "potMutu",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'Mutu',
+                  'Potongan Mutu',
                 ),
               ),
             ),
             GridColumn(
-              columnName: "potonganLain",
+              columnName: "potMengkal",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'Pot-Lain Lain',
+                  'Potongan Mengkal',
                 ),
               ),
             ),
             GridColumn(
-              columnName: "mentah",
+              columnName: "potLain",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'Mentah',
+                  'Potongan Lain-lain',
                 ),
               ),
             ),
             GridColumn(
-              columnName: "busuk",
+              columnName: "pulMentah",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'Busuk',
+                  'Pulangan Mentah',
                 ),
               ),
             ),
             GridColumn(
-              columnName: "kosong",
+              columnName: "pulBusuk",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'Kosong',
+                  'Pulangan Busuk',
                 ),
               ),
             ),
             GridColumn(
-              columnName: "pulanganLain",
+              columnName: "pulKosong",
               label: Container(
                 padding: const EdgeInsets.all(16.0),
                 alignment: Alignment.centerLeft,
                 child: const Text(
-                  'Pul-Lain Lain',
+                  'Pulangan Kosong',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "pulLain",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Pulangan Lain-lain',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "jamMasuk",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Jam Masuk',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "jamKeluar",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Jam Keluar',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "tanggalDibuat",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Tanggal Dibuat',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "tanggalDiubah",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Tanggal Diubah',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "diubahOleh",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Diubah Oleh',
+                ),
+              ),
+            ),
+            GridColumn(
+              columnName: "tanggalSinkron",
+              label: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Tanggal Sinkron',
                 ),
               ),
             ),
@@ -386,7 +379,7 @@ class _LaporanPageState extends State<LaporanPage> {
       );
     }
 
-    Widget pagination() {
+    Widget pagination(LaporanDataSource laporanDataSource) {
       return SfDataPager(
           pageCount: laporan.length / rowsPerPage, delegate: laporanDataSource);
     }
@@ -401,24 +394,47 @@ class _LaporanPageState extends State<LaporanPage> {
       ),
       body: Container(
         margin: const EdgeInsets.only(left: 24, right: 24, top: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const ButtonExport(),
-            LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                        height: context.height * 0.7, child: buildDataGrid()),
-                    pagination(),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
+        child: FutureBuilder(
+            future: DataTimbanganKeluar().getDataTimbanganKeluar(),
+            builder: (context, snapshot) {
+              if (snapshot.data != null) {
+                laporan = snapshot.data;
+                laporanDataSource = LaporanDataSource(laporan: laporan);
+              }
+              return !snapshot.hasData
+                  ? Center(
+                      child: CircularProgressIndicator(color: cBlue),
+                    )
+                  : snapshot.data!.isEmpty
+                      ? Center(
+                          child: Text(
+                            "Tidak ada data",
+                            style: greyTextStyle.copyWith(
+                                fontSize: 14, fontWeight: semiBold),
+                          ),
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const ButtonExport(),
+                            LayoutBuilder(
+                              builder: (BuildContext context,
+                                  BoxConstraints constraints) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                        height: context.height * 0.7,
+                                        child:
+                                            buildDataGrid(laporanDataSource)),
+                                    pagination(laporanDataSource),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        );
+            }),
       ),
     );
   }

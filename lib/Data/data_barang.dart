@@ -11,4 +11,16 @@ class DataBarang {
         : [];
     return barangList;
   }
+
+  Future<Map<String, String>> getDataBarangInputText() async {
+    Database db = await DBHelper.instance.db;
+    var supplier = await db.query('barang');
+    final dataList = <String, String>{};
+    for (final result in supplier) {
+      final idBarang = result['idBarang'].toString();
+      final namaBarang = result['namaBarang'].toString();
+      dataList[idBarang] = namaBarang;
+    }
+    return dataList;
+  }
 }

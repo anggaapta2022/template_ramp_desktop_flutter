@@ -168,121 +168,60 @@ class SupplierDataSource extends DataGridSource {
   }
 }
 
-class Laporan {
-  Laporan(
-      this.idLaporan,
-      this.supplier,
-      this.supir,
-      this.nopol,
-      this.namaBarang,
-      this.bruto,
-      this.manualBruto,
-      this.jamMasuk,
-      this.konfirmasiBruto,
-      this.tara,
-      this.manualTara,
-      this.jamKeluar,
-      this.konfirmasiTara,
-      this.netto,
-      this.potonganPercent,
-      this.potonganBerat,
-      this.beratTerima,
-      this.tanggalTimbang,
-      this.beratTandan,
-      this.jumlahTandan,
-      this.air,
-      this.sampah,
-      this.tangkai,
-      this.pasir,
-      this.mutu,
-      this.potonganLain,
-      this.mentah,
-      this.busuk,
-      this.kosong,
-      this.pulanganLain);
-  final String idLaporan;
-  final String supplier;
-  final String supir;
-  final String nopol;
-  final String namaBarang;
-  final String bruto;
-  final String manualBruto;
-  final String jamMasuk;
-  final String konfirmasiBruto;
-  final String tara;
-  final String manualTara;
-  final String jamKeluar;
-  final String konfirmasiTara;
-  final String netto;
-  final String potonganPercent;
-  final String potonganBerat;
-  final String beratTerima;
-  final String tanggalTimbang;
-  final String beratTandan;
-  final String jumlahTandan;
-  final String air;
-  final String sampah;
-  final String tangkai;
-  final String pasir;
-  final String mutu;
-  final String potonganLain;
-  final String mentah;
-  final String busuk;
-  final String kosong;
-  final String pulanganLain;
-}
-
 class LaporanDataSource extends DataGridSource {
   List<DataGridRow> _laporan = [];
   @override
   List<DataGridRow> get rows => _laporan;
 
-  LaporanDataSource({required List<Laporan> laporan}) {
+  LaporanDataSource({required List<TimbanganKeluarModel> laporan}) {
     _laporan = laporan
         .map<DataGridRow>((e) => DataGridRow(cells: [
-              DataGridCell<String>(columnName: 'idLaporan', value: e.idLaporan),
-              DataGridCell<String>(columnName: 'supplier', value: e.supplier),
-              DataGridCell<String>(columnName: 'supir', value: e.supir),
-              DataGridCell<String>(columnName: 'nopol', value: e.nopol),
+              DataGridCell<String>(
+                  columnName: 'idLaporanKeluar', value: e.idLaporanKeluar),
+              DataGridCell<String>(
+                  columnName: 'idLaporanMasuk', value: e.idLaporanMasuk),
+              DataGridCell<String>(
+                  columnName: 'namaSupplier', value: e.namaSupplier),
+              DataGridCell<String>(columnName: 'noPolisi', value: e.noPolisi),
+              DataGridCell<String>(columnName: 'namaSupir', value: e.namaSupir),
               DataGridCell<String>(
                   columnName: 'namaBarang', value: e.namaBarang),
-              DataGridCell<String>(columnName: 'bruto', value: e.bruto),
-              DataGridCell<String>(
+              DataGridCell<int>(columnName: 'bruto', value: e.bruto),
+              DataGridCell<int>(
                   columnName: 'manualBruto', value: e.manualBruto),
-              DataGridCell<String>(columnName: 'jamMasuk', value: e.jamMasuk),
               DataGridCell<String>(
                   columnName: 'konfirmasiBruto', value: e.konfirmasiBruto),
-              DataGridCell<String>(columnName: 'tara', value: e.tara),
-              DataGridCell<String>(
-                  columnName: 'manualTara', value: e.manualTara),
-              DataGridCell<String>(columnName: 'jamKeluar', value: e.jamKeluar),
+              DataGridCell<int>(columnName: 'tara', value: e.tara),
+              DataGridCell<int>(columnName: 'manualTara', value: e.manualTara),
               DataGridCell<String>(
                   columnName: 'konfirmasiTara', value: e.konfirmasiTara),
-              DataGridCell<String>(columnName: 'netto', value: e.netto),
-              DataGridCell<String>(
-                  columnName: 'potonganPercent', value: e.potonganPercent),
-              DataGridCell<String>(
-                  columnName: 'potonganBerat', value: e.potonganBerat),
-              DataGridCell<String>(
-                  columnName: 'beratTerima', value: e.beratTerima),
-              DataGridCell<String>(
-                  columnName: 'tanggalTimbang', value: e.tanggalTimbang),
-              DataGridCell<String>(
+              DataGridCell<int>(columnName: 'netto', value: e.netto),
+              DataGridCell<int>(columnName: 'potPercent', value: e.potPercent),
+              DataGridCell<int>(
                   columnName: 'beratTandan', value: e.beratTandan),
-              DataGridCell<String>(
+              DataGridCell<int>(
                   columnName: 'jumlahTandan', value: e.jumlahTandan),
-              DataGridCell<String>(columnName: 'air', value: e.air),
-              DataGridCell<String>(columnName: 'sampah', value: e.sampah),
-              DataGridCell<String>(columnName: 'tangkai', value: e.tangkai),
-              DataGridCell<String>(columnName: 'pasir', value: e.pasir),
-              DataGridCell<String>(columnName: 'mutu', value: e.mutu),
+              DataGridCell<int>(columnName: 'potAir', value: e.potAir),
+              DataGridCell<int>(columnName: 'potSampah', value: e.potSampah),
+              DataGridCell<int>(columnName: 'potTangkai', value: e.potTangkai),
+              DataGridCell<int>(columnName: 'potPasir', value: e.potPasir),
+              DataGridCell<int>(columnName: 'potMutu', value: e.potMutu),
+              DataGridCell<int>(columnName: 'potMengkal', value: e.potMengkal),
+              DataGridCell<int>(columnName: 'potLain', value: e.potLain),
+              DataGridCell<int>(columnName: 'pulMentah', value: e.pulMentah),
+              DataGridCell<int>(columnName: 'pulBusuk', value: e.pulBusuk),
+              DataGridCell<int>(columnName: 'pulKosong', value: e.pulKosong),
+              DataGridCell<int>(columnName: 'pulLain', value: e.pulLain),
+              DataGridCell<String>(columnName: 'jamMasuk', value: e.jamMasuk),
+              DataGridCell<String>(columnName: 'jamKeluar', value: e.jamKeluar),
               DataGridCell<String>(
-                  columnName: 'potonganLain', value: e.potonganLain),
-              DataGridCell<String>(columnName: 'mentah', value: e.mentah),
-              DataGridCell<String>(columnName: 'busuk', value: e.busuk),
-              DataGridCell<String>(columnName: 'kosong', value: e.kosong),
+                  columnName: 'tanggalDibuat', value: e.tanggalDibuat),
               DataGridCell<String>(
-                  columnName: 'pulanganLain', value: e.pulanganLain),
+                  columnName: 'tanggalDiubah', value: e.tanggalDiubah),
+              DataGridCell<String>(
+                  columnName: 'diubahOleh', value: e.diubahOleh),
+              DataGridCell<String>(
+                  columnName: 'tanggalSinkron', value: e.tanggalSinkron),
             ]))
         .toList();
   }

@@ -11,29 +11,99 @@ class TBSKeluarPage extends StatefulWidget {
 }
 
 class _TBSKeluarPageState extends State<TBSKeluarPage> {
-  TextEditingController inputManualController = TextEditingController();
-  TextEditingController potonganPercentController = TextEditingController();
-  TextEditingController beratTandanController = TextEditingController();
-  TextEditingController jumlahTandanController = TextEditingController();
-  TextEditingController airController = TextEditingController();
-  TextEditingController sampahController = TextEditingController();
-  TextEditingController tangkaiController = TextEditingController();
-  TextEditingController pasirController = TextEditingController();
-  TextEditingController mutuController = TextEditingController();
-  TextEditingController mengkalController = TextEditingController();
-  TextEditingController potonganLainController = TextEditingController();
-  TextEditingController mentahController = TextEditingController();
-  TextEditingController busukController = TextEditingController();
-  TextEditingController kosongController = TextEditingController();
-  TextEditingController pulanganLainController = TextEditingController();
   final formKey = GlobalKey<FormState>();
   final formKey2 = GlobalKey<FormState>();
   bool inputManual = false;
   String dateNow = DateFormat('dd MMM yyyy').format(DateTime.now());
   List<TimbanganMasukModel> dataTimbangan = <TimbanganMasukModel>[];
+  String receivedData = "";
+  String isConnect = "Konek Timbangan";
+  late SerialPort port;
+
+  Future getValuePreferences() async {
+    var indikatorProvider =
+        Provider.of<IndikatorProvider>(context, listen: false);
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    indikatorProvider.devicePort = preferences.getString("port") == ""
+        ? ""
+        : preferences.getString("port")!;
+    indikatorProvider.baudRate = preferences.getString("baudRate") == ""
+        ? ""
+        : preferences.getString("baudRate")!;
+    indikatorProvider.parity = preferences.getString("parity") == ""
+        ? ""
+        : preferences.getString("parity")!;
+    indikatorProvider.dataBits = preferences.getString("dataBits") == ""
+        ? ""
+        : preferences.getString("dataBits")!;
+    indikatorProvider.stopBits = preferences.getString("stopBits") == ""
+        ? ""
+        : preferences.getString("stopBits")!;
+  }
+
+  openAndGetData() {
+    var indikatorProvider =
+        Provider.of<IndikatorProvider>(context, listen: false);
+    port = SerialPort(indikatorProvider.devicePort,
+        BaudRate: int.parse(indikatorProvider.baudRate),
+        StopBits: int.parse(indikatorProvider.stopBits),
+        openNow: false,
+        Parity: indikatorProvider.parity == "None"
+            ? 0
+            : indikatorProvider.parity == "Odd"
+                ? 1
+                : 2,
+        ByteSize: int.parse(indikatorProvider.dataBits),
+        ReadIntervalTimeout: 1,
+        ReadTotalTimeoutConstant: 2);
+    port.open();
+    print("status port: ${port.isOpened}");
+    String msg = "";
+    port.readBytesOnListen(16, (value) {
+      String decodedString = ascii.decode(value);
+      String replacedString =
+          decodedString.replaceAll(RegExp('[\x02\x03]'), '|');
+
+      if (replacedString != "+" && replacedString.isNotEmpty) {
+        if (msg.length == 9) {
+          if (mounted) {
+            String msgFinal = msg;
+            setState(() {
+              receivedData = msgFinal.replaceAll('|', '').substring(0, 6);
+            });
+          }
+        } else if (replacedString == "|" && msg.length > 10) {
+          msg = "";
+        }
+        msg += replacedString;
+      }
+      print("isi data: $receivedData");
+    });
+  }
+
+  closePort() {
+    var indikatorProvider =
+        Provider.of<IndikatorProvider>(context, listen: false);
+    port = SerialPort(indikatorProvider.devicePort,
+        BaudRate: int.parse(indikatorProvider.baudRate),
+        StopBits: int.parse(indikatorProvider.stopBits),
+        openNow: false,
+        Parity: indikatorProvider.parity == "None"
+            ? 0
+            : indikatorProvider.parity == "Odd"
+                ? 1
+                : 2,
+        ByteSize: int.parse(indikatorProvider.dataBits),
+        ReadIntervalTimeout: 1,
+        ReadTotalTimeoutConstant: 2);
+    port.close();
+    print("status port: ${port.isOpened}");
+  }
+
   @override
   void initState() {
     super.initState();
+    getValuePreferences();
     print("isi idSelected: ${widget.idSelected}");
   }
 
@@ -44,6 +114,8 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
 
   @override
   Widget build(BuildContext context) {
+    var globalProvider = Provider.of<GlobalProvider>(context);
+    var timKeluarProvider = Provider.of<TimbanganKeluarProvider>(context);
     Widget sectionIformationTimbangMasuk() {
       return Container(
         margin: const EdgeInsets.only(bottom: 20),
@@ -56,7 +128,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                   if (mounted) {
                     setState(() {
                       dataTimbangan = snapshot.data;
-                      print("isi dataTimbangan: $dataTimbangan");
+                      // print("isi dataTimbangan: $dataTimbangan");
                     });
                   }
                 });
@@ -143,6 +215,22 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                               style: blackTextStyle.copyWith(
                                   fontSize: 16, fontWeight: semiBold),
                             ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              "Id Laporan Masuk",
+                              style: greyTextStyle.copyWith(
+                                  fontSize: 14, fontWeight: medium),
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              widget.idSelected,
+                              style: blackTextStyle.copyWith(
+                                  fontSize: 16, fontWeight: semiBold),
+                            )
                           ],
                         );
             }),
@@ -167,7 +255,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                             fontSize: 20, fontWeight: semiBold),
                       ),
                       Text(
-                        "0000 kg",
+                        "${receivedData == "" ? "0000000" : receivedData} kg",
                         style: customTextStyle.copyWith(
                             fontSize: 24, fontWeight: bold, color: cBlue),
                       ),
@@ -177,16 +265,41 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
+                    onTap: isConnect != "Konek Timbangan"
+                        ? () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => Dialog(
+                                backgroundColor: cTransparent,
+                                alignment: Alignment.center,
+                                shadowColor: cBlack.withOpacity(0.5),
+                                child: const UnPlug(),
+                              ),
+                            );
+                            setState(() {
+                              closePort();
+                              isConnect = "Konek Timbangan";
+                              receivedData = "";
+                            });
+                          }
+                        : () {
+                            setState(() {
+                              openAndGetData();
+                              isConnect = "Putuskan Koneksi";
+                            });
+                          },
                     child: Container(
                       width: context.width * 0.12,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: cGreen.withOpacity(0.5),
+                        color: isConnect != "Konek Timbangan"
+                            ? cRed.withOpacity(0.5)
+                            : cGreen.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
                         child: Text(
-                          "Konek Timbangan",
+                          isConnect,
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: semiBold),
                         ),
@@ -247,7 +360,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
             ),
             inputManual
                 ? TextFormField(
-                    controller: inputManualController,
+                    controller: timKeluarProvider.inputManualController,
                     keyboardType: TextInputType.number,
                     style:
                         blackTextStyle.copyWith(fontSize: 16, fontWeight: bold),
@@ -279,7 +392,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
               style: greyTextStyle.copyWith(fontSize: 14, fontWeight: semiBold),
             ),
             TextFormField(
-              controller: potonganPercentController,
+              controller: timKeluarProvider.potonganPercentController,
               keyboardType: TextInputType.number,
               style: blackTextStyle.copyWith(fontSize: 16, fontWeight: bold),
               validator: (value) {
@@ -315,7 +428,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                   width: 5,
                 ),
                 Text(
-                  widget.idSelected,
+                  timKeluarProvider.idLaporanKeluar,
                   style: customTextStyle.copyWith(
                       fontSize: 16, fontWeight: bold, color: cBlue),
                 ),
@@ -327,7 +440,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
             Row(
               children: [
                 Text(
-                  "Waktu Masuk:",
+                  "Waktu Keluar:",
                   style: blackTextStyle.copyWith(
                       fontSize: 16, fontWeight: semiBold),
                 ),
@@ -359,7 +472,40 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                         backgroundColor: cTransparent,
                         alignment: Alignment.center,
                         shadowColor: cBlack.withOpacity(0.5),
-                        child: const DialogKonfirmasiTBSKeluar(),
+                        child: DialogKonfirmasiTBSKeluar(
+                          idLaporanKeluar: timKeluarProvider.idLaporanKeluar,
+                          namaSupplier: dataTimbangan[0].supplier,
+                          noPolisi: dataTimbangan[0].nopol,
+                          namaSupir: dataTimbangan[0].supir,
+                          namaBarang: dataTimbangan[0].namaBarang,
+                          idLaporanMasuk: dataTimbangan[0].idLaporan,
+                          bruto: dataTimbangan[0].bruto.toString(),
+                          manualBruto: dataTimbangan[0].manualBruto.toString(),
+                          tara: receivedData.replaceFirst(RegExp('^0+'), ''),
+                          manualTara:
+                              timKeluarProvider.inputManualController.text,
+                          potPercent:
+                              timKeluarProvider.potonganPercentController.text,
+                          netto: "0",
+                          beratTandan:
+                              timKeluarProvider.beratTandanController.text,
+                          jumlahTandan:
+                              timKeluarProvider.jumlahTandanController.text,
+                          potAir: timKeluarProvider.airController.text,
+                          potSampah: timKeluarProvider.sampahController.text,
+                          potTangkai: timKeluarProvider.tangkaiController.text,
+                          potPasir: timKeluarProvider.pasirController.text,
+                          potMutu: timKeluarProvider.mutuController.text,
+                          potMengkal: timKeluarProvider.mengkalController.text,
+                          potLain:
+                              timKeluarProvider.potonganLainController.text,
+                          pulMentah: timKeluarProvider.mentahController.text,
+                          pulBusuk: timKeluarProvider.busukController.text,
+                          pulKosong: timKeluarProvider.kosongController.text,
+                          pulLain:
+                              timKeluarProvider.pulanganLainController.text,
+                          jamMasuk: dataTimbangan[0].jamMasuk,
+                        ),
                       ),
                     );
                   },
@@ -384,18 +530,38 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
               width: 25,
             ),
             Expanded(
-              child: GestureDetector(
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: cOrange.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Reset",
-                      style: whiteTextStyle.copyWith(
-                          fontSize: 18, fontWeight: semiBold),
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () {
+                    timKeluarProvider.inputManualController.text = "";
+                    timKeluarProvider.potonganPercentController.text = "";
+                    timKeluarProvider.beratTandanController.text = "";
+                    timKeluarProvider.jumlahTandanController.text = "";
+                    timKeluarProvider.airController.text = "";
+                    timKeluarProvider.sampahController.text = "";
+                    timKeluarProvider.tangkaiController.text = "";
+                    timKeluarProvider.pasirController.text = "";
+                    timKeluarProvider.mutuController.text = "";
+                    timKeluarProvider.mengkalController.text = "";
+                    timKeluarProvider.potonganLainController.text = "";
+                    timKeluarProvider.mentahController.text = "";
+                    timKeluarProvider.busukController.text = "";
+                    timKeluarProvider.kosongController.text = "";
+                    timKeluarProvider.pulanganLainController.text = "";
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: cOrange.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "Reset",
+                        style: whiteTextStyle.copyWith(
+                            fontSize: 18, fontWeight: semiBold),
+                      ),
                     ),
                   ),
                 ),
@@ -654,20 +820,6 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                               ],
                             ),
                           ),
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("Berat Terima:",
-                                    style: blackTextStyle.copyWith(
-                                        fontSize: 14, fontWeight: medium)),
-                                Text("0 kg",
-                                    style: blackTextStyle.copyWith(
-                                        fontSize: 14, fontWeight: medium)),
-                              ],
-                            ),
-                          ),
                           const SizedBox(
                             height: 10,
                           ),
@@ -675,7 +827,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                               style: blackTextStyle.copyWith(
                                   fontSize: 14, fontWeight: medium)),
                           TextFormField(
-                            controller: beratTandanController,
+                            controller: timKeluarProvider.beratTandanController,
                             style: blackTextStyle.copyWith(
                                 fontSize: 14, fontWeight: semiBold),
                             validator: (value) {
@@ -704,7 +856,8 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                               style: blackTextStyle.copyWith(
                                   fontSize: 14, fontWeight: medium)),
                           TextFormField(
-                            controller: jumlahTandanController,
+                            controller:
+                                timKeluarProvider.jumlahTandanController,
                             style: blackTextStyle.copyWith(
                                 fontSize: 14, fontWeight: semiBold),
                             validator: (value) {
@@ -778,7 +931,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: medium)),
                       TextFormField(
-                        controller: airController,
+                        controller: timKeluarProvider.airController,
                         style: blackTextStyle.copyWith(
                             fontSize: 14, fontWeight: semiBold),
                         validator: (value) {
@@ -808,7 +961,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: medium)),
                       TextFormField(
-                        controller: sampahController,
+                        controller: timKeluarProvider.sampahController,
                         style: blackTextStyle.copyWith(
                             fontSize: 14, fontWeight: semiBold),
                         validator: (value) {
@@ -838,7 +991,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: medium)),
                       TextFormField(
-                        controller: tangkaiController,
+                        controller: timKeluarProvider.tangkaiController,
                         style: blackTextStyle.copyWith(
                             fontSize: 14, fontWeight: semiBold),
                         validator: (value) {
@@ -868,7 +1021,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: medium)),
                       TextFormField(
-                        controller: pasirController,
+                        controller: timKeluarProvider.pasirController,
                         style: blackTextStyle.copyWith(
                             fontSize: 14, fontWeight: semiBold),
                         validator: (value) {
@@ -898,7 +1051,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: medium)),
                       TextFormField(
-                        controller: mutuController,
+                        controller: timKeluarProvider.mutuController,
                         style: blackTextStyle.copyWith(
                             fontSize: 14, fontWeight: semiBold),
                         validator: (value) {
@@ -928,7 +1081,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: medium)),
                       TextFormField(
-                        controller: mengkalController,
+                        controller: timKeluarProvider.mengkalController,
                         style: blackTextStyle.copyWith(
                             fontSize: 14, fontWeight: semiBold),
                         validator: (value) {
@@ -958,7 +1111,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: medium)),
                       TextFormField(
-                        controller: potonganLainController,
+                        controller: timKeluarProvider.potonganLainController,
                         style: blackTextStyle.copyWith(
                             fontSize: 14, fontWeight: semiBold),
                         validator: (value) {
@@ -1034,7 +1187,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: medium)),
                       TextFormField(
-                        controller: mentahController,
+                        controller: timKeluarProvider.mentahController,
                         style: blackTextStyle.copyWith(
                             fontSize: 14, fontWeight: semiBold),
                         validator: (value) {
@@ -1064,7 +1217,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: medium)),
                       TextFormField(
-                        controller: busukController,
+                        controller: timKeluarProvider.busukController,
                         style: blackTextStyle.copyWith(
                             fontSize: 14, fontWeight: semiBold),
                         validator: (value) {
@@ -1094,7 +1247,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: medium)),
                       TextFormField(
-                        controller: kosongController,
+                        controller: timKeluarProvider.kosongController,
                         style: blackTextStyle.copyWith(
                             fontSize: 14, fontWeight: semiBold),
                         validator: (value) {
@@ -1124,7 +1277,7 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
                           style: blackTextStyle.copyWith(
                               fontSize: 14, fontWeight: medium)),
                       TextFormField(
-                        controller: pulanganLainController,
+                        controller: timKeluarProvider.pulanganLainController,
                         style: blackTextStyle.copyWith(
                             fontSize: 14, fontWeight: semiBold),
                         validator: (value) {
@@ -1193,47 +1346,54 @@ class _TBSKeluarPageState extends State<TBSKeluarPage> {
               )
             ],
           )
-        : Row(
-            children: [
-              Container(
-                width: context.width * 0.3,
-                margin: const EdgeInsets.only(left: 24, right: 24, top: 10),
-                child: Form(
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  key: formKey,
-                  child: ScrollConfiguration(
-                    behavior: ScrollConfiguration.of(context)
-                        .copyWith(scrollbars: false),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          sectionIformationTimbangMasuk(),
-                          sectionTara(),
-                          buttonSubmit(),
-                        ],
+        : globalProvider.loading
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: cBlue,
+                ),
+              )
+            : Row(
+                children: [
+                  Container(
+                    width: context.width * 0.3,
+                    margin: const EdgeInsets.only(left: 24, right: 24, top: 10),
+                    child: Form(
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      key: formKey,
+                      child: ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(context)
+                            .copyWith(scrollbars: false),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              sectionIformationTimbangMasuk(),
+                              sectionTara(),
+                              buttonSubmit(),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-              const VerticalDivider(),
-              Expanded(
-                  child: Container(
-                margin: const EdgeInsets.only(left: 24, right: 24, top: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    sectionRightTopText(),
-                    sectionRightInformation(),
-                    Form(
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        key: formKey2,
-                        child: sectionRightInput()),
-                  ],
-                ),
-              )),
-            ],
-          );
+                  const VerticalDivider(),
+                  Expanded(
+                      child: Container(
+                    margin: const EdgeInsets.only(left: 24, right: 24, top: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        sectionRightTopText(),
+                        sectionRightInformation(),
+                        Form(
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            key: formKey2,
+                            child: sectionRightInput()),
+                      ],
+                    ),
+                  )),
+                ],
+              );
   }
 }

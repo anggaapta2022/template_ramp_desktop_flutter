@@ -1,27 +1,20 @@
-// ignore_for_file: must_be_immutable, avoid_print
+// ignore_for_file: must_be_immutable, avoid_print, use_build_context_synchronously
 
 part of './widgets.dart';
 
-class DialogSetupIndicator extends StatelessWidget {
-  DialogSetupIndicator({super.key});
+class DialogSetupIndicator extends StatefulWidget {
+  const DialogSetupIndicator({super.key});
 
+  @override
+  State<DialogSetupIndicator> createState() => _DialogSetupIndicatorState();
+}
+
+class _DialogSetupIndicatorState extends State<DialogSetupIndicator> {
   TextEditingController portController = TextEditingController();
   TextEditingController baudRateController = TextEditingController();
   TextEditingController parityController = TextEditingController();
   TextEditingController dataBitsController = TextEditingController();
   TextEditingController stopBitsController = TextEditingController();
-  final focusPort = FocusNode();
-  final focusBaudRate = FocusNode();
-  final focusParity = FocusNode();
-  final focusDataBits = FocusNode();
-  final focusStopBits = FocusNode();
-  Map<String, String> dataPort = {
-    'port1': 'port 1',
-    'port2': 'port 2',
-    'port3': 'port 3',
-    'port4': 'port 4',
-    'port5': 'port 5',
-  };
 
   Map<String, String> dataBaudRate = {
     'baud1': '1200',
@@ -35,6 +28,45 @@ class DialogSetupIndicator extends StatelessWidget {
     'parity2': 'Even',
     'parity3': 'None',
   };
+
+  List<String> listPorts = [];
+  Map<String, String> portMap = {};
+  String? currentKey;
+
+  getPorts() {
+    final List<String> portInfoLists = SerialPort.getAvailablePorts();
+    print("isi list ports: $portInfoLists");
+    for (String portName in portInfoLists) {
+      portMap[portName] = portName;
+    }
+    print(portMap);
+  }
+
+  Future setValuePreferences() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString("port", portController.text);
+    preferences.setString("baudRate", baudRateController.text);
+    preferences.setString("parity", parityController.text);
+    preferences.setString("dataBits", dataBitsController.text);
+    preferences.setString("stopBits", stopBitsController.text);
+  }
+
+  Future getValuePreferences() async {
+    var indikatorProvider =
+        Provider.of<IndikatorProvider>(context, listen: false);
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    indikatorProvider.devicePort = preferences.getString("port")!;
+    indikatorProvider.baudRate = preferences.getString("baudRate")!;
+    indikatorProvider.parity = preferences.getString("parity")!;
+    indikatorProvider.dataBits = preferences.getString("dataBits")!;
+    indikatorProvider.stopBits = preferences.getString("stopBits")!;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getPorts();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +96,7 @@ class DialogSetupIndicator extends StatelessWidget {
               return null;
             },
             onSubmit: (value) {
-              final filter = dataPort.entries
+              final filter = portMap.entries
                   .where((element) =>
                       element.value.toLowerCase() == value.toLowerCase())
                   .toList();
@@ -74,11 +106,9 @@ class DialogSetupIndicator extends StatelessWidget {
               print("isi data submit: $value");
             },
             suggestionState: Suggestion.expand,
-            textInputAction: TextInputAction.next,
             marginColor: cGrey.withOpacity(0.2),
             onSuggestionTap: (SearchFieldListItem<String> x) {
               print("isi port controller: ${portController.text}");
-              focusPort.unfocus();
             },
             searchStyle:
                 blackTextStyle.copyWith(fontSize: 16, fontWeight: semiBold),
@@ -106,7 +136,7 @@ class DialogSetupIndicator extends StatelessWidget {
               hintStyle:
                   greyTextStyle.copyWith(fontSize: 16, fontWeight: light),
             ),
-            suggestions: dataPort.entries.map((MapEntry<String, String> entry) {
+            suggestions: portMap.entries.map((MapEntry<String, String> entry) {
               var key = entry.key;
               var value = entry.value;
               return SearchFieldListItem<String>(value,
@@ -156,11 +186,9 @@ class DialogSetupIndicator extends StatelessWidget {
               print("isi data submit: $value");
             },
             suggestionState: Suggestion.expand,
-            textInputAction: TextInputAction.next,
             marginColor: cGrey.withOpacity(0.2),
             onSuggestionTap: (SearchFieldListItem<String> x) {
               print("isi baudrate controller: ${baudRateController.text}");
-              focusBaudRate.unfocus();
             },
             searchStyle:
                 blackTextStyle.copyWith(fontSize: 16, fontWeight: semiBold),
@@ -239,11 +267,9 @@ class DialogSetupIndicator extends StatelessWidget {
               print("isi data submit: $value");
             },
             suggestionState: Suggestion.expand,
-            textInputAction: TextInputAction.next,
             marginColor: cGrey.withOpacity(0.2),
             onSuggestionTap: (SearchFieldListItem<String> x) {
               print("isi parity controller: ${parityController.text}");
-              focusParity.unfocus();
             },
             searchStyle:
                 blackTextStyle.copyWith(fontSize: 16, fontWeight: semiBold),
@@ -303,10 +329,8 @@ class DialogSetupIndicator extends StatelessWidget {
           ),
           TextFormField(
             controller: dataBitsController,
-            textInputAction: TextInputAction.next,
             onFieldSubmitted: (value) {
               print("isi data bits: $value");
-              focusDataBits.unfocus();
             },
             style: blackTextStyle.copyWith(fontSize: 16, fontWeight: semiBold),
             decoration: InputDecoration(
@@ -332,10 +356,8 @@ class DialogSetupIndicator extends StatelessWidget {
           ),
           TextFormField(
             controller: stopBitsController,
-            textInputAction: TextInputAction.next,
             onFieldSubmitted: (value) {
               print("isi stopbits: $value");
-              focusStopBits.unfocus();
             },
             style: blackTextStyle.copyWith(fontSize: 16, fontWeight: semiBold),
             decoration: InputDecoration(
@@ -361,6 +383,12 @@ class DialogSetupIndicator extends StatelessWidget {
               MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: GestureDetector(
+                  onTap: () async {
+                    setValuePreferences().whenComplete(() {
+                      getValuePreferences();
+                      context.pop();
+                    });
+                  },
                   child: Container(
                     width: context.width * 0.1,
                     height: 35,

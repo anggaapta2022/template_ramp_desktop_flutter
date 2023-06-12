@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 part of './pages.dart';
 
 class IndikatorPage extends StatefulWidget {
@@ -9,8 +11,110 @@ class IndikatorPage extends StatefulWidget {
 
 class _IndikatorPageState extends State<IndikatorPage> {
   String resultIndicator = "";
+  String receivedData = "";
+  String buttonConnect = "OPEN";
+  late SerialPort port;
+
+  openAndGetData() {
+    var indikatorProvider =
+        Provider.of<IndikatorProvider>(context, listen: false);
+    port = SerialPort(indikatorProvider.devicePort,
+        BaudRate: int.parse(indikatorProvider.baudRate),
+        StopBits: int.parse(indikatorProvider.stopBits),
+        openNow: false,
+        Parity: indikatorProvider.parity == "None"
+            ? 0
+            : indikatorProvider.parity == "Odd"
+                ? 1
+                : 2,
+        ByteSize: int.parse(indikatorProvider.dataBits),
+        ReadIntervalTimeout: 1,
+        ReadTotalTimeoutConstant: 2);
+    port.open();
+    print("status port: ${port.isOpened}");
+    setState(() {
+      buttonConnect = "CLOSE";
+    });
+    String msg = "";
+    port.readBytesOnListen(16, (value) {
+      String decodedString = ascii.decode(value);
+      String replacedString =
+          decodedString.replaceAll(RegExp('[\x02\x03]'), '|');
+
+      if (replacedString != "+" && replacedString.isNotEmpty) {
+        if (msg.length == 9) {
+          if (mounted) {
+            String msgFinal = msg;
+            setState(() {
+              receivedData = msgFinal.replaceAll('|', '').substring(0, 6);
+            });
+          }
+        } else if (replacedString == "|" && msg.length > 10) {
+          msg = "";
+        }
+        msg += replacedString;
+      }
+      print("isi data: $receivedData");
+    });
+  }
+
+  closePort() {
+    var indikatorProvider =
+        Provider.of<IndikatorProvider>(context, listen: false);
+    port = SerialPort(indikatorProvider.devicePort,
+        BaudRate: int.parse(indikatorProvider.baudRate),
+        StopBits: int.parse(indikatorProvider.stopBits),
+        openNow: false,
+        Parity: indikatorProvider.parity == "None"
+            ? 0
+            : indikatorProvider.parity == "Odd"
+                ? 1
+                : 2,
+        ByteSize: int.parse(indikatorProvider.dataBits),
+        ReadIntervalTimeout: 1,
+        ReadTotalTimeoutConstant: 2);
+    port.close();
+    setState(() {
+      buttonConnect = "OPEN";
+    });
+    print("status port: ${port.isOpened}");
+  }
+
+  Future getValuePreferences() async {
+    var indikatorProvider =
+        Provider.of<IndikatorProvider>(context, listen: false);
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    indikatorProvider.devicePort = preferences.getString("port") == ""
+        ? ""
+        : preferences.getString("port")!;
+    indikatorProvider.baudRate = preferences.getString("baudRate") == ""
+        ? ""
+        : preferences.getString("baudRate")!;
+    indikatorProvider.parity = preferences.getString("parity") == ""
+        ? ""
+        : preferences.getString("parity")!;
+    indikatorProvider.dataBits = preferences.getString("dataBits") == ""
+        ? ""
+        : preferences.getString("dataBits")!;
+    indikatorProvider.stopBits = preferences.getString("stopBits") == ""
+        ? ""
+        : preferences.getString("stopBits")!;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getValuePreferences();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    var indikatorProvider = Provider.of<IndikatorProvider>(context);
     Widget sectionInformationIndicator() {
       return Expanded(
         child: Container(
@@ -48,7 +152,7 @@ class _IndikatorPageState extends State<IndikatorPage> {
                               backgroundColor: cTransparent,
                               alignment: Alignment.center,
                               shadowColor: cBlack.withOpacity(0.5),
-                              child: DialogSetupIndicator()),
+                              child: const DialogSetupIndicator()),
                         );
                       },
                       child: Container(
@@ -133,7 +237,7 @@ class _IndikatorPageState extends State<IndikatorPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "COM4",
+                          indikatorProvider.devicePort,
                           style: blackTextStyle.copyWith(
                               fontSize: 16, fontWeight: semiBold),
                         ),
@@ -141,7 +245,7 @@ class _IndikatorPageState extends State<IndikatorPage> {
                           height: 15,
                         ),
                         Text(
-                          "1200",
+                          indikatorProvider.baudRate,
                           style: blackTextStyle.copyWith(
                               fontSize: 16, fontWeight: semiBold),
                         ),
@@ -149,7 +253,7 @@ class _IndikatorPageState extends State<IndikatorPage> {
                           height: 15,
                         ),
                         Text(
-                          "Even",
+                          indikatorProvider.parity,
                           style: blackTextStyle.copyWith(
                               fontSize: 16, fontWeight: semiBold),
                         ),
@@ -157,7 +261,7 @@ class _IndikatorPageState extends State<IndikatorPage> {
                           height: 15,
                         ),
                         Text(
-                          "7",
+                          indikatorProvider.dataBits,
                           style: blackTextStyle.copyWith(
                               fontSize: 16, fontWeight: semiBold),
                         ),
@@ -165,7 +269,7 @@ class _IndikatorPageState extends State<IndikatorPage> {
                           height: 15,
                         ),
                         Text(
-                          "1",
+                          indikatorProvider.stopBits,
                           style: blackTextStyle.copyWith(
                               fontSize: 16, fontWeight: semiBold),
                         ),
@@ -224,74 +328,42 @@ class _IndikatorPageState extends State<IndikatorPage> {
                         MouseRegion(
                           cursor: SystemMouseCursors.click,
                           child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                resultIndicator = "OPEN";
-                              });
-                            },
+                            onTap: buttonConnect != "OPEN"
+                                ? () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => Dialog(
+                                        backgroundColor: cTransparent,
+                                        alignment: Alignment.center,
+                                        shadowColor: cBlack.withOpacity(0.5),
+                                        child: const UnPlug(),
+                                      ),
+                                    );
+                                    setState(() {
+                                      closePort();
+                                      resultIndicator = "CLOSE";
+                                      receivedData = "";
+                                    });
+                                  }
+                                : () {
+                                    setState(() {
+                                      openAndGetData();
+                                      resultIndicator = "OPEN";
+                                    });
+                                  },
                             child: Container(
                               width: 100,
                               height: 35,
                               margin: const EdgeInsets.only(bottom: 25),
                               decoration: BoxDecoration(
-                                color: cBlue.withOpacity(0.7),
+                                color: buttonConnect != "OPEN"
+                                    ? cRed.withOpacity(0.7)
+                                    : cBlue.withOpacity(0.7),
                                 borderRadius: BorderRadius.circular(5),
                               ),
                               child: Center(
                                 child: Text(
-                                  "OPEN",
-                                  style: whiteTextStyle.copyWith(
-                                      fontSize: 14, fontWeight: bold),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                resultIndicator = "CLOSE";
-                              });
-                            },
-                            child: Container(
-                              width: 100,
-                              height: 35,
-                              margin: const EdgeInsets.only(bottom: 25),
-                              decoration: BoxDecoration(
-                                color: cOrange.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "CLOSE",
-                                  style: whiteTextStyle.copyWith(
-                                      fontSize: 14, fontWeight: bold),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                resultIndicator = "";
-                              });
-                            },
-                            child: Container(
-                              width: 100,
-                              height: 35,
-                              margin: const EdgeInsets.only(bottom: 25),
-                              decoration: BoxDecoration(
-                                color: cRed.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "EMPTY",
+                                  buttonConnect,
                                   style: whiteTextStyle.copyWith(
                                       fontSize: 14, fontWeight: bold),
                                 ),
@@ -348,7 +420,7 @@ class _IndikatorPageState extends State<IndikatorPage> {
             RichText(
                 text: TextSpan(children: [
               TextSpan(
-                text: "0000",
+                text: receivedData == "" ? "0000000" : receivedData,
                 style: customTextStyle.copyWith(
                     fontSize: 28, fontWeight: semiBold, color: cBlue),
               ),

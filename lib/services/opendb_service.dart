@@ -69,6 +69,44 @@ class DBHelper {
       tanggalSinkron TEXT
     )
   ''');
+
+    await db.execute('''
+    CREATE TABLE IF NOT EXISTS laporan(
+      idLaporanKeluar TEXT NOT NULL PRIMARY KEY,
+      idLaporanMasuk TEXT NOT NULL,
+      namaSupplier TEXT,
+      noPolisi TEXT,
+      namaSupir TEXT,
+      namaBarang TEXT,
+      bruto INTEGER,
+      manualBruto INTEGER,
+	    konfirmasiBruto TEXT,
+	    tara INTEGER,
+	    manualTara INTEGER,
+	    konfirmasiTara TEXT,
+	    netto INTEGER,
+	    potPercent INTEGER,
+	    beratTandan INTEGER,
+	    jumlahTandan INTEGER,
+	    potAir INTEGER,
+	    potSampah INTEGER,
+	    potTangkai INTEGER,
+	    potPasir INTEGER,
+	    potMutu INTEGER,
+	    potMengkal INTEGER,
+	    potLain INTEGER,
+	    pulMentah INTEGER,
+	    pulBusuk INTEGER,
+	    pulKosong INTEGER,
+	    pulLain INTEGER,
+	    jamMasuk TEXT,
+	    jamKeluar TEXT,
+      tanggalDibuat TEXT,
+      tanggalDiubah TEXT,
+      diubahOleh TEXT,
+      tanggalSinkron TEXT
+      )
+    ''');
   }
 
   Future close() async {

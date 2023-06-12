@@ -27,6 +27,7 @@ class DialogKonfirmasiTBSMasuk extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var globalProvider = Provider.of<GlobalProvider>(context);
+    var timMasukProvider = Provider.of<TimbanganMasukProvider>(context);
     return Container(
       width: context.width * 0.5,
       height: context.height * 0.6,
@@ -118,7 +119,7 @@ class DialogKonfirmasiTBSMasuk extends StatelessWidget {
                       height: 10,
                     ),
                     Text(
-                      "Berat Bruto:  $bruto",
+                      "Berat Bruto:  ${bruto.isEmpty ? 0 : bruto}",
                       style: blackTextStyle.copyWith(
                           fontSize: 18, fontWeight: semiBold),
                     ),
@@ -176,16 +177,16 @@ class DialogKonfirmasiTBSMasuk extends StatelessWidget {
                                     supir: supir,
                                     nopol: nopol,
                                     namaBarang: namaBarang,
-                                    bruto: int.parse(bruto),
+                                    bruto: bruto.isEmpty ? 0 : int.parse(bruto),
                                     manualBruto: int.parse(manualBruto),
                                     jamMasuk: jamMasuk,
                                     konfrimasiBruto: konfirmasiBruto));
-                            globalProvider.supplierController.text = "";
-                            globalProvider.nopolController.text = "";
-                            globalProvider.supirController.text = "";
-                            globalProvider.barangController.text = "";
-                            globalProvider.inputManualController.text = "";
-                            globalProvider.idLaporan =
+                            timMasukProvider.supplierController.text = "";
+                            timMasukProvider.nopolController.text = "";
+                            timMasukProvider.supirController.text = "";
+                            timMasukProvider.barangController.text = "";
+                            timMasukProvider.inputManualController.text = "";
+                            timMasukProvider.idLaporanMasuk =
                                 "FP-${DateFormat('dd/MM/yy').format(DateTime.now())}/${randomNumeric(4)}";
                             await DataTimbanganMasuk()
                                 .getDataTimbanganMasuk()

@@ -8,7 +8,6 @@ class SearchInputText extends StatelessWidget {
   final String title;
   final FocusNode focusNode;
   final TextEditingController controller;
-  // final Function(String) suggestionTap;
   final Function(String) onSubmit;
   final bool canEdit;
   const SearchInputText(

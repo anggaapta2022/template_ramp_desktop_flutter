@@ -33,7 +33,6 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
-  flutter_libserialport: ^0.3.0
   font_awesome_flutter: ^10.4.0
   google_fonts: ^4.0.5
   intl: ^0.18.1
@@ -42,11 +41,16 @@ dependencies:
   provider: ^6.0.5
   random_string: ^2.3.1
   searchfield: ^0.8.3
+  serial_port_win32: ^0.7.0
+  shared_preferences: ^2.1.2
   sidebarx: ^0.15.0
   sqflite_common: ^2.4.5
   sqflite_common_ffi: ^2.2.5
   syncfusion_flutter_core: ^21.2.8
   syncfusion_flutter_datagrid: ^21.2.8
+
+dependency_overrides:
+  win32: ^3.0.0
 
 dev_dependencies:
   flutter_lints: ^2.0.0

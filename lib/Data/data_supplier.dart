@@ -11,4 +11,16 @@ class DataSupplier {
         : [];
     return supplierList;
   }
+
+  Future<Map<String, String>> getDataSupplierInputText() async {
+    Database db = await DBHelper.instance.db;
+    var supplier = await db.query('supplier');
+    final dataList = <String, String>{};
+    for (final result in supplier) {
+      final idSupplier = result['idSupplier'].toString();
+      final namaSupplier = result['namaSupplier'].toString();
+      dataList[idSupplier] = namaSupplier;
+    }
+    return dataList;
+  }
 }

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:ramp_desktop/screen/pages/pages.dart';
+import 'package:ramp_desktop/services/indikator_provider.dart';
 import 'package:ramp_desktop/services/page_provider.dart';
+import 'package:ramp_desktop/services/timbangan_keluar_provider.dart';
 import 'package:ramp_desktop/services/timbangan_masuk_provider.dart';
 import 'package:ramp_desktop/shared/theme.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
@@ -39,6 +41,10 @@ class MyApp extends StatelessWidget {
             create: (context) => PageProvider()),
         ChangeNotifierProvider<TimbanganMasukProvider>(
             create: (context) => TimbanganMasukProvider()),
+        ChangeNotifierProvider<TimbanganKeluarProvider>(
+            create: (context) => TimbanganKeluarProvider()),
+        ChangeNotifierProvider<IndikatorProvider>(
+            create: (context) => IndikatorProvider()),
       ],
       child: MaterialApp(
         theme: ThemeData(

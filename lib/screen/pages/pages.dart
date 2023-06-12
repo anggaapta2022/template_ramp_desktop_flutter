@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
@@ -7,21 +8,29 @@ import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart' as lottie;
 import 'package:provider/provider.dart';
 import 'package:ramp_desktop/Data/data_barang.dart';
+import 'package:ramp_desktop/Data/data_supir.dart';
 import 'package:ramp_desktop/Data/data_timbanganMasuk.dart';
 import 'package:ramp_desktop/models/timbangan_model.dart';
 import 'package:ramp_desktop/screen/widgets/widgets.dart';
 import 'package:ramp_desktop/services/extensions.dart';
+import 'package:ramp_desktop/services/indikator_provider.dart';
+import 'package:serial_port_win32/serial_port_win32.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sidebarx/sidebarx.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 
+import '../../Data/data_kendaraan.dart';
 import '../../Data/data_supplier.dart';
+import '../../Data/data_timbanganKeluar.dart';
 import '../../models/barang_model.dart';
 import '../../models/supplier_model.dart';
 import '../../services/data_grid_source.dart';
 import '../../services/global_provider.dart';
 import '../../services/page_provider.dart';
+import '../../services/timbangan_keluar_provider.dart';
+import '../../services/timbangan_masuk_provider.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 
